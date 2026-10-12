@@ -154,6 +154,7 @@ h1 span {
   transition: background .25s;
   pointer-events: none;
 }
+.viewer.is-light-off .warm-wash { opacity: 0; }
 
 .canvas-wrap {
   position: absolute;
@@ -492,16 +493,21 @@ body.is-immersive .immersive-palette {
 }
 #temperature {
   width: 100%;
-  height: 18px;
+  height: 44px;
   margin: 1px 0 0;
   appearance: none;
   background: transparent;
   cursor: pointer;
+  touch-action: none;
 }
+.temperature-control.is-disabled #temperature,
+.temperature-control.is-disabled .range-labels,
+.temperature-control.is-disabled output { opacity: .4; }
+#temperature:disabled { cursor: not-allowed; }
 #temperature::-webkit-slider-runnable-track {
   height: 5px;
   border-radius: 100px;
-  background: linear-gradient(90deg, #ffb25d, #fff0c2 50%, #cddcff);
+  background: linear-gradient(90deg, #ffe6ad, #ffffff 50%, #dce8ff);
 }
 #temperature::-webkit-slider-thumb {
   width: 18px;
@@ -516,7 +522,7 @@ body.is-immersive .immersive-palette {
 #temperature::-moz-range-track {
   height: 5px;
   border-radius: 100px;
-  background: linear-gradient(90deg, #ffb25d, #fff0c2 50%, #cddcff);
+  background: linear-gradient(90deg, #ffe6ad, #ffffff 50%, #dce8ff);
 }
 #temperature::-moz-range-thumb {
   width: 15px;

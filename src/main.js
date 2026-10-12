@@ -2,6 +2,7 @@ import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { palettes, mixedShades } from './palettes.js'
+import { lightTemperature } from './light-temperature.js'
 
 const models = [
   { id: 'dome', name: 'Dome', price: 320 },
@@ -118,9 +119,10 @@ document.querySelector('#app').innerHTML = `
         </section>
 
         <section class="control-section temperature-control">
-          <div class="section-title"><span>04</span><h3>Light temperature</h3><output id="temperature-value">3200K</output></div>
-          <input id="temperature" type="range" min="0" max="100" value="32" aria-label="Light temperature">
-          <div class="range-labels"><span>Warm</span><span>Cool</span></div>
+          <div class="section-title"><span>04</span><h3>Light temperature</h3><output id="temperature-value" for="temperature">3550K</output></div>
+          <input id="temperature" type="range" min="0" max="100" step="0.1" value="32" aria-label="Light temperature" aria-describedby="temperature-help">
+          <div class="range-labels"><span>Warm</span><span>Neutral</span><span>Cool</span></div>
+          <p id="temperature-help" class="sr-only">Turn on the lamp to adjust its light temperature.</p>
         </section>
 
         <div class="purchase-row">
@@ -231,9 +233,9 @@ function addCable(topY, material) {
 
 function addGlow(y, size = 0.58) {
   const glowMaterial = new THREE.MeshStandardMaterial({
-    color: 0xfff6df,
-    emissive: 0xffb85d,
-    emissiveIntensity: state.lightOn ? 2.2 : 0.08,
+    color: 0xffffff,
+    emissive: 0xffffff,
+    emissiveIntensity: state.lightOn ? 2.2 : 0,
     roughness: 0.2,
   })
   const bulb = addMesh(new THREE.SphereGeometry(size, 48, 32), glowMaterial, [0, y, 0])
@@ -249,7 +251,10 @@ function buildDome(material, accent, trim, cable) {
   addMesh(new THREE.CylinderGeometry(0.43, 0.56, 0.78, 48), accent, [0, 0.92, 0])
   addMesh(new THREE.CylinderGeometry(1.45, 1.82, 1.08, 64, 1, true), material, [0, -0.02, 0])
   addMesh(new THREE.TorusGeometry(1.81, 0.055, 16, 64), trim, [0, -0.56, 0], [Math.PI / 2, 0, 0])
-  addMesh(new THREE.CircleGeometry(1.7, 64), new THREE.MeshBasicMaterial({ color: 0xfff4d8, side: THREE.DoubleSide }), [0, -0.555, 0], [Math.PI / 2, 0, 0])
+  const diffuser = addMesh(new THREE.CircleGeometry(1.7, 64),
+    new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.4, side: THREE.DoubleSide }),
+    [0, -0.555, 0], [Math.PI / 2, 0, 0])
+  diffuser.userData.isBulb = true
   addGlow(-0.72, 0.44)
 }
 
@@ -331,19 +336,17 @@ function buildLamp() {
   }
 }
 
-function temperatureColor(value) {
-  const warm = new THREE.Color('#ffad55')
-  const neutral = new THREE.Color('#fff0c2')
-  const cool = new THREE.Color('#dbe5ff')
-  return value < 50 ? warm.clone().lerp(neutral, value / 50) : neutral.clone().lerp(cool, (value - 50) / 50)
-}
-
 function updateLight() {
-  const color = temperatureColor(state.temperature)
-  const kelvin = Math.round((2200 + state.temperature * 30) / 100) * 100
+  const { color, tint, kelvin } = lightTemperature(state.temperature)
+  const slider = document.querySelector('#temperature')
+  slider.disabled = !state.lightOn
+  slider.value = state.temperature
+  slider.setAttribute('aria-valuetext', `${kelvin} kelvin`)
+  document.querySelector('.temperature-control').classList.toggle('is-disabled', !state.lightOn)
+  document.querySelector('.viewer').classList.toggle('is-light-off', !state.lightOn)
   document.querySelector('#temperature-value').textContent = `${kelvin}K`
-  document.documentElement.style.setProperty('--glow-color', `#${color.getHexString()}`)
-  keyLight.color.copy(color)
+  document.documentElement.style.setProperty('--glow-color', `#${tint.getHexString()}`)
+  // Studio illumination stays fixed; only the lamp's own light changes.
   if (lampLight) {
     lampLight.color.copy(color)
     lampLight.intensity = state.lightOn ? 7 : 0
@@ -351,7 +354,7 @@ function updateLight() {
   lampRoot.traverse((child) => {
     if (child.userData.isBulb) {
       child.material.emissive.copy(color)
-      child.material.emissiveIntensity = state.lightOn ? 2.2 : 0.08
+      child.material.emissiveIntensity = state.lightOn ? 2.2 : 0
     }
   })
   document.querySelector('#light-toggle').classList.toggle('is-on', state.lightOn)
@@ -418,9 +421,19 @@ document.querySelectorAll('[data-material]').forEach((button) => {
 })
 
 document.querySelector('#temperature').addEventListener('input', (event) => {
+  if (!state.lightOn) {
+    event.target.value = state.temperature
+    return
+  }
   state.temperature = Number(event.target.value)
   updateLight()
 })
+
+// Keep the native range input's mouse, touch, and keyboard behavior. Its
+// gestures belong to the slider, never to the adjacent OrbitControls canvas.
+for (const type of ['pointerdown', 'pointermove', 'pointerup', 'pointercancel', 'touchstart', 'touchmove', 'touchend']) {
+  document.querySelector('#temperature').addEventListener(type, (event) => event.stopPropagation(), { passive: true })
+}
 
 document.querySelector('#light-toggle').addEventListener('click', () => {
   state.lightOn = !state.lightOn
