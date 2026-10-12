@@ -1,19 +1,13 @@
 import './style.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
+import { palettes, mixedShades } from './palettes.js'
 
 const models = [
   { id: 'dome', name: 'Dome', price: 320 },
   { id: 'orbit', name: 'Orbit', price: 365 },
   { id: 'tier', name: 'Tier', price: 410 },
   { id: 'glass', name: 'Glass', price: 490 },
-]
-
-const colors = [
-  { name: 'Lavender', value: '#A9B3DD' },
-  { name: 'Butter', value: '#F3E082' },
-  { name: 'Rose', value: '#E2AFB6' },
-  { name: 'Cloud', value: '#FFFFFF' },
 ]
 
 const materials = [
@@ -25,7 +19,8 @@ const materials = [
 
 const state = {
   model: models[0],
-  color: colors[1],
+  palette: 'yellow',
+  shades: [...palettes[1].shades],
   material: materials[0],
   temperature: 32,
   lightOn: true,
@@ -37,12 +32,21 @@ const modelIcon = (id) => `
   </span>
 `
 
+const paletteButtons = () => palettes.map(({ id, name, shades }) => `
+  <button class="color-option${state.palette === id ? ' is-selected' : ''}"
+    type="button" aria-pressed="${state.palette === id}" data-palette="${id}"
+    title="${id === 'mixed' ? 'Generate a new combination every time' : name}">
+    <span class="palette-swatch" aria-hidden="true" style="background: linear-gradient(90deg, ${shades.map((shade, i) => `${shade} ${i * 25}% ${(i + 1) * 25}%`).join(', ')})"></span>
+    <span>${name}</span>
+  </button>
+`).join('')
+
 document.querySelector('#app').innerHTML = `
   <div class="site-shell">
     <header class="site-header">
       <a class="logo" href="#" aria-label="Stap lighting home"><span>sta</span><span>p</span></a>
       <p>Lighting with character</p>
-      <button class="menu-button" type="button" aria-label="Open menu"><span></span><span></span></button>
+      <button class="menu-button" id="immersive-trigger" type="button" aria-label="Open immersive lamp view" aria-expanded="false"><span></span><span></span></button>
     </header>
 
     <main class="configurator">
@@ -53,6 +57,10 @@ document.querySelector('#app').innerHTML = `
         </div>
         <div class="warm-wash" aria-hidden="true"></div>
         <div class="canvas-wrap" id="canvas-wrap"></div>
+        <button class="immersive-exit" id="immersive-exit" type="button" aria-label="Exit immersive view">
+          <span aria-hidden="true"></span>
+          <span aria-hidden="true"></span>
+        </button>
         <div class="viewer-toolbar">
           <p><span class="drag-icon" aria-hidden="true">↔</span> Drag to rotate</p>
           <button id="reset-view" type="button">Reset view</button>
@@ -62,6 +70,9 @@ document.querySelector('#app').innerHTML = `
           <span id="light-label">Light on</span>
         </button>
         <p class="model-count"><span id="model-index">01</span> / 04</p>
+        <div class="immersive-palette color-row" role="group" aria-label="Lamp colors">
+          ${paletteButtons()}
+        </div>
       </section>
 
       <aside class="controls" aria-label="Lamp configuration">
@@ -89,10 +100,8 @@ document.querySelector('#app').innerHTML = `
         <section class="control-section control-section--split">
           <div>
             <div class="section-title"><span>02</span><h3>Color</h3></div>
-            <div class="color-row" role="radiogroup" aria-label="Lamp color">
-              ${colors.map((color, index) => `
-                <button class="color-option${index === 1 ? ' is-selected' : ''}" type="button" role="radio" aria-checked="${index === 1}" aria-label="${color.name}" title="${color.name}" data-color="${color.value}" style="--swatch: ${color.value}"></button>
-              `).join('')}
+            <div class="color-row" role="group" aria-label="Lamp colors">
+              ${paletteButtons()}
             </div>
           </div>
           <div>
@@ -119,13 +128,15 @@ document.querySelector('#app').innerHTML = `
         </div>
       </aside>
     </main>
+    <p id="color-status" class="sr-only" role="status"></p>
   </div>
 `
 
 const canvasWrap = document.querySelector('#canvas-wrap')
 const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true })
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-renderer.setSize(canvasWrap.clientWidth, canvasWrap.clientHeight)
+// Let the canvas follow its container in both layouts, without a fixed inline size.
+renderer.setSize(canvasWrap.clientWidth, canvasWrap.clientHeight, false)
 renderer.shadowMap.enabled = true
 renderer.shadowMap.type = THREE.PCFShadowMap
 renderer.outputColorSpace = THREE.SRGBColorSpace
@@ -152,6 +163,7 @@ const keyLight = new THREE.DirectionalLight(0xffd9a6, 2.6)
 keyLight.position.set(-4, 7, 3)
 keyLight.castShadow = true
 keyLight.shadow.mapSize.set(1024, 1024)
+keyLight.shadow.normalBias = 0.025
 keyLight.shadow.camera.left = -5
 keyLight.shadow.camera.right = 5
 keyLight.shadow.camera.top = 6
@@ -225,43 +237,44 @@ function addGlow(y, size = 0.58) {
     roughness: 0.2,
   })
   const bulb = addMesh(new THREE.SphereGeometry(size, 48, 32), glowMaterial, [0, y, 0])
+  bulb.userData.isBulb = true
   lampLight = new THREE.PointLight(0xffb25e, state.lightOn ? 7 : 0, 8, 1.8)
   lampLight.position.set(0, y - 0.1, 0)
   lampRoot.add(lampLight)
   return bulb
 }
 
-function buildDome(material, accent) {
-  addCable(1.28, accent)
+function buildDome(material, accent, trim, cable) {
+  addCable(1.28, cable)
   addMesh(new THREE.CylinderGeometry(0.43, 0.56, 0.78, 48), accent, [0, 0.92, 0])
   addMesh(new THREE.CylinderGeometry(1.45, 1.82, 1.08, 64, 1, true), material, [0, -0.02, 0])
-  addMesh(new THREE.TorusGeometry(1.81, 0.055, 16, 64), material, [0, -0.56, 0], [Math.PI / 2, 0, 0])
+  addMesh(new THREE.TorusGeometry(1.81, 0.055, 16, 64), trim, [0, -0.56, 0], [Math.PI / 2, 0, 0])
   addMesh(new THREE.CircleGeometry(1.7, 64), new THREE.MeshBasicMaterial({ color: 0xfff4d8, side: THREE.DoubleSide }), [0, -0.555, 0], [Math.PI / 2, 0, 0])
   addGlow(-0.72, 0.44)
 }
 
-function buildOrbit(material, accent) {
-  addCable(1.22, accent)
+function buildOrbit(material, accent, trim, cable) {
+  addCable(1.22, cable)
   addMesh(new THREE.SphereGeometry(0.38, 48, 32), accent, [0, 0.92, 0])
-  addMesh(new THREE.TorusGeometry(0.72, 0.19, 24, 64), material, [0, 0.46, 0], [Math.PI / 2, 0, 0])
+  addMesh(new THREE.TorusGeometry(0.72, 0.19, 24, 64), trim, [0, 0.46, 0], [Math.PI / 2, 0, 0])
   addMesh(new THREE.SphereGeometry(1.35, 64, 32), material, [0, -0.08, 0], [0, 0, 0], [1.24, 0.34, 1.24])
-  addMesh(new THREE.TorusGeometry(1.45, 0.08, 18, 64), material, [0, -0.08, 0], [Math.PI / 2, 0, 0])
+  addMesh(new THREE.TorusGeometry(1.45, 0.08, 18, 64), trim, [0, -0.08, 0], [Math.PI / 2, 0, 0])
   addGlow(-0.78, 0.62)
 }
 
-function buildTier(material, accent) {
-  addCable(1.35, accent)
+function buildTier(material, accent, trim, cable) {
+  addCable(1.35, cable)
   addMesh(new THREE.CylinderGeometry(0.22, 0.28, 0.34, 40), accent, [0, 1.18, 0])
   addMesh(new THREE.CylinderGeometry(1.54, 1.54, 0.36, 64), material, [0, 0.7, 0])
-  addMesh(new THREE.CylinderGeometry(1.2, 1.2, 0.4, 64), material, [0, 0.2, 0])
-  addMesh(new THREE.CylinderGeometry(0.78, 0.78, 0.54, 64), material, [0, -0.31, 0])
+  addMesh(new THREE.CylinderGeometry(1.2, 1.2, 0.4, 64), accent, [0, 0.2, 0])
+  addMesh(new THREE.CylinderGeometry(0.78, 0.78, 0.54, 64), trim, [0, -0.31, 0])
   addGlow(-0.72, 0.48)
 }
 
-function buildGlass(material, accent) {
-  addCable(1.74, accent)
+function buildGlass(material, accent, trim, cable) {
+  addCable(1.74, cable)
   addMesh(new THREE.SphereGeometry(0.36, 48, 32), accent, [0, 1.47, 0], [0, 0, 0], [1.15, 0.6, 1.15])
-  addMesh(new THREE.TorusGeometry(0.48, 0.13, 22, 64), finishMaterial('#A9B3DD', state.material.id), [0, 1.08, 0], [Math.PI / 2, 0, 0])
+  addMesh(new THREE.TorusGeometry(0.48, 0.13, 22, 64), trim, [0, 1.08, 0], [Math.PI / 2, 0, 0])
 
   const points = [
     new THREE.Vector2(0.55, -1.55),
@@ -275,7 +288,7 @@ function buildGlass(material, accent) {
   const glassMaterial = state.material.id === 'crystal'
     ? material
     : new THREE.MeshPhysicalMaterial({
-        color: new THREE.Color(state.color.value),
+        color: new THREE.Color(state.shades[0]),
         transparent: true,
         opacity: state.material.id === 'matte' ? 0.76 : 0.62,
         transmission: state.material.id === 'matte' ? 0.18 : 0.72,
@@ -284,6 +297,7 @@ function buildGlass(material, accent) {
         ior: 1.42,
         clearcoat: state.material.id === 'shine' ? 1 : 0.45,
       })
+  glassMaterial.userData.colorSlot = 0
   addMesh(new THREE.LatheGeometry(points, 72), glassMaterial, [0, -0.08, 0])
   addMesh(new THREE.CylinderGeometry(0.22, 0.22, 1.45, 32), accent, [0, -0.14, 0])
   addGlow(-0.72, 0.36)
@@ -301,18 +315,20 @@ function disposeLamp() {
 function buildLamp() {
   disposeLamp()
   lampLight = null
-  const material = finishMaterial(state.color.value, state.material.id)
-  const accentColor = state.model.id === 'dome' ? '#E2AFB6' : state.color.value
-  const accent = finishMaterial(accentColor, state.material.id === 'crystal' ? 'shine' : state.material.id)
-
-  if (state.model.id === 'dome') buildDome(material, accent)
-  if (state.model.id === 'orbit') buildOrbit(material, accent)
-  if (state.model.id === 'tier') buildTier(material, accent)
-  if (state.model.id === 'glass') buildGlass(material, accent)
+  const finishes = state.shades.map((color, slot) => {
+    const finish = finishMaterial(color, slot === 1 && state.material.id === 'crystal' ? 'shine' : state.material.id)
+    finish.userData.colorSlot = slot
+    return finish
+  })
+  const builders = { dome: buildDome, orbit: buildOrbit, tier: buildTier, glass: buildGlass }
+  builders[state.model.id](...finishes)
 
   lampRoot.rotation.y = -0.32
   revealScale = 0.84
   updateLight()
+  if (document.body.classList.contains('is-immersive')) {
+    requestAnimationFrame(frameLampForImmersive)
+  }
 }
 
 function temperatureColor(value) {
@@ -333,7 +349,7 @@ function updateLight() {
     lampLight.intensity = state.lightOn ? 7 : 0
   }
   lampRoot.traverse((child) => {
-    if (child.material?.emissive) {
+    if (child.userData.isBulb) {
       child.material.emissive.copy(color)
       child.material.emissiveIntensity = state.lightOn ? 2.2 : 0.08
     }
@@ -367,11 +383,28 @@ document.querySelectorAll('[data-model]').forEach((button) => {
   })
 })
 
-document.querySelectorAll('[data-color]').forEach((button) => {
+document.querySelectorAll('[data-palette]').forEach((button) => {
   button.addEventListener('click', () => {
-    state.color = colors.find((color) => color.value === button.dataset.color)
-    selectGroup('[data-color]', button)
-    buildLamp()
+    const palette = palettes.find((item) => item.id === button.dataset.palette)
+    state.palette = palette.id
+    state.shades = palette.id === 'mixed' ? mixedShades(state.shades) : [...palette.shades]
+    // Recolor existing materials: keep geometry, finish, lighting, and camera intact.
+    lampRoot.traverse((part) => {
+      const slot = part.material?.userData.colorSlot
+      if (slot !== undefined) part.material.color.set(state.shades[slot])
+    })
+    document.querySelectorAll('[data-palette]').forEach((option) => {
+      const selected = option.dataset.palette === state.palette
+      option.classList.toggle('is-selected', selected)
+      option.setAttribute('aria-pressed', selected)
+      if (option.dataset.palette === 'mixed' && state.palette === 'mixed') {
+        option.querySelector('.palette-swatch').style.background =
+          `linear-gradient(90deg, ${state.shades.map((shade, i) => `${shade} ${i * 25}% ${(i + 1) * 25}%`).join(', ')})`
+      }
+    })
+    document.querySelector('#color-status').textContent = palette.id === 'mixed'
+      ? `New mixed colors: ${state.shades.join(', ')}`
+      : `${palette.name} palette applied`
   })
 })
 
@@ -400,6 +433,74 @@ document.querySelector('#reset-view').addEventListener('click', () => {
   controls.update()
 })
 
+const immersiveTrigger = document.querySelector('#immersive-trigger')
+const immersiveExit = document.querySelector('#immersive-exit')
+let savedView = null
+
+function enterImmersiveView() {
+  if (document.body.classList.contains('is-immersive')) return
+
+  savedView = {
+    position: camera.position.clone(),
+    target: controls.target.clone(),
+    minDistance: controls.minDistance,
+    maxDistance: controls.maxDistance,
+  }
+
+  controls.minDistance = 5.5
+  controls.maxDistance = 14
+
+  document.body.classList.add('is-immersive')
+  immersiveTrigger.setAttribute('aria-expanded', 'true')
+  requestAnimationFrame(() => {
+    resize()
+    frameLampForImmersive()
+    immersiveExit.focus()
+  })
+}
+
+function frameLampForImmersive() {
+  const bounds = new THREE.Box3().setFromObject(lampRoot)
+  const center = bounds.getCenter(new THREE.Vector3())
+  const size = bounds.getSize(new THREE.Vector3())
+  const viewingDirection = camera.position.clone().sub(controls.target).normalize()
+  const verticalFov = THREE.MathUtils.degToRad(camera.fov)
+  const horizontalFov = 2 * Math.atan(Math.tan(verticalFov / 2) * camera.aspect)
+  const verticalDistance = (size.y / 2) / Math.tan(verticalFov / 2)
+  const horizontalDistance = (size.x / 2) / Math.tan(horizontalFov / 2)
+  const distance = Math.max(verticalDistance, horizontalDistance) * 1.18 + size.z * 0.25
+
+  controls.target.copy(center)
+  camera.position.copy(center).add(viewingDirection.multiplyScalar(distance))
+  controls.update()
+}
+
+function exitImmersiveView() {
+  if (!document.body.classList.contains('is-immersive')) return
+
+  document.body.classList.remove('is-immersive')
+  immersiveTrigger.setAttribute('aria-expanded', 'false')
+
+  if (savedView) {
+    camera.position.copy(savedView.position)
+    controls.target.copy(savedView.target)
+    controls.minDistance = savedView.minDistance
+    controls.maxDistance = savedView.maxDistance
+    controls.update()
+  }
+
+  requestAnimationFrame(() => {
+    resize()
+    immersiveTrigger.focus()
+  })
+}
+
+immersiveTrigger.addEventListener('click', enterImmersiveView)
+immersiveExit.addEventListener('click', exitImmersiveView)
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape') exitImmersiveView()
+})
+
 function resize() {
   const width = canvasWrap.clientWidth
   const height = canvasWrap.clientHeight
@@ -409,6 +510,7 @@ function resize() {
 }
 
 window.addEventListener('resize', resize)
+new ResizeObserver(resize).observe(canvasWrap)
 
 function animate() {
   requestAnimationFrame(animate)
