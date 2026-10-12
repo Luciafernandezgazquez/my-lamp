@@ -116,7 +116,6 @@ document.querySelector('#app').innerHTML = `
 
         <div class="purchase-row">
           <div class="price"><span>Final price</span><strong id="price">€355</strong></div>
-          <button class="add-button" id="add-button" type="button"><span>Add to cart</span><b aria-hidden="true">↗</b></button>
         </div>
       </aside>
     </main>
@@ -399,16 +398,6 @@ document.querySelector('#reset-view').addEventListener('click', () => {
   camera.position.set(5.2, 1.1, 8.5)
   controls.target.set(0, -0.25, 0)
   controls.update()
-})
-
-document.querySelector('#add-button').addEventListener('click', (event) => {
-  const button = event.currentTarget
-  button.classList.add('is-added')
-  button.querySelector('span').textContent = 'Added to cart'
-  setTimeout(() => {
-    button.classList.remove('is-added')
-    button.querySelector('span').textContent = 'Add to cart'
-  }, 1800)
 })
 
 function resize() {
