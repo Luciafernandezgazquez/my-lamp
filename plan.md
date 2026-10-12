@@ -29,22 +29,3 @@ Materials that the user can choose from, ceramic, crystal, matte, shine
 ![Typogrpahy](public/assets/TYPOGRAPHY.jpg)
 Neue Haas Grotesk Display Pro (55 Roman) for titles and Neue Haas Grotesk Display Pro (45 Light) for body text 
 
-# 3D Lamp Configurator — Project Plan
-
-## 1. Project Overview
-
-The project is an interactive 3D configurator for a lighting brand.
-
-Users will be able to explore a lamp in 3D and customise different elements of the product before choosing their final configuration.
-
-The experience should feel simple, visual and design-focused rather than technical.
-
-### Main Goal
-
-Create an interactive product experience where users can:
-
-- View the lamp in 3D
-- Rotate and explore the product
-- Change its configuration
-- Compare different combinations
-- Create a personalised version of the lamp
