@@ -3,6 +3,7 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { palettes, mixedShades } from './palettes.js'
 import { lightTemperature } from './light-temperature.js'
+import { createCeramicEnvironment, createCeramicMaterial } from './ceramic-material.js'
 
 const models = [
   { id: 'dome', name: 'Dome', price: 320 },
@@ -168,6 +169,7 @@ renderer.outputColorSpace = THREE.SRGBColorSpace
 renderer.toneMapping = THREE.NeutralToneMapping
 renderer.toneMappingExposure = 0.95
 canvasWrap.appendChild(renderer.domElement)
+const ceramicEnvironment = createCeramicEnvironment(renderer)
 
 const scene = new THREE.Scene()
 const camera = new THREE.PerspectiveCamera(32, canvasWrap.clientWidth / canvasWrap.clientHeight, 0.1, 100)
@@ -236,14 +238,16 @@ function finishMaterial(color, materialId) {
   if (materialId === 'matte') {
     return new THREE.MeshStandardMaterial({ ...options, roughness: 0.88, metalness: 0 })
   }
-  return new THREE.MeshPhysicalMaterial({ ...options, roughness: 0.3, clearcoat: 0.55, clearcoatRoughness: 0.24 })
+  return createCeramicMaterial(base, ceramicEnvironment.texture)
 }
 
 function addMesh(geometry, material, position = [0, 0, 0], rotation = [0, 0, 0], scale = [1, 1, 1]) {
+  // Keep procedural grain equally sized on narrow, round, and flattened parts.
+  if (material.userData.isCeramic) geometry.scale(...scale)
   const mesh = new THREE.Mesh(geometry, material)
   mesh.position.set(...position)
   mesh.rotation.set(...rotation)
-  mesh.scale.set(...scale)
+  if (!material.userData.isCeramic) mesh.scale.set(...scale)
   mesh.castShadow = true
   mesh.receiveShadow = true
   lampRoot.add(mesh)
@@ -313,7 +317,7 @@ function buildGlass(material, accent, trim, cable) {
     new THREE.Vector2(0.38, 0.9),
     new THREE.Vector2(0.3, 1.08),
   ]
-  const glassMaterial = state.material.id === 'crystal'
+  const glassMaterial = ['crystal', 'ceramic'].includes(state.material.id)
     ? material
     : new THREE.MeshPhysicalMaterial({
         color: new THREE.Color(state.shades[0]),
