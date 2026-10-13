@@ -1,10 +1,15 @@
+// Four distinct tones per family keep the lamp's existing part assignments clear.
+const pink = ['#EDB5C5', '#D69BAE', '#F4CCD7', '#FBE5EA']
+const yellow = ['#F2E3AB', '#D9C78F', '#E8CEAA', '#FCF4D9']
+const blue = ['#BEC5E7', '#9DA8CE', '#D5D9EF', '#EEF0FA']
+
 export const palettes = [
-  { id: 'pink', name: 'Pink', shades: ['#E06D86', '#E2AFB6', '#E4818E', '#FFD6DC'] },
-  { id: 'yellow', name: 'Yellow', shades: ['#F3E082', '#E2CA52', '#F3C482', '#FFF6BA'] },
-  { id: 'blue', name: 'Blue', shades: ['#A9B3DD', '#6D7FCD', '#C5D0FF', '#3850ED'] },
+  { id: 'pink', name: 'Pink', shades: pink },
+  { id: 'yellow', name: 'Yellow', shades: yellow },
+  { id: 'blue', name: 'Blue', shades: blue },
   { id: 'white', name: 'White', shades: Array(4).fill('#FFFFFF') },
   { id: 'black', name: 'Black', shades: Array(4).fill('#000000') },
-  { id: 'mixed', name: 'Mixed colors', shades: ['#E06D86', '#F3E082', '#A9B3DD', '#3850ED'] },
+  { id: 'mixed', name: 'Mixed colors', shades: [pink[0], yellow[0], blue[0], blue[3]] },
 ]
 
 // Alternate the main shade's color family, not just a similar shade within it.
