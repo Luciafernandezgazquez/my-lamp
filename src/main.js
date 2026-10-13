@@ -42,6 +42,13 @@ const paletteButtons = () => palettes.map(({ id, name, shades }) => `
   </button>
 `).join('')
 
+const immersiveCategories = [
+  { id: 'model', label: 'Model', icon: '<path d="M12 3v4M7 15h10M5 15a7 7 0 0 1 14 0v2H5zM9 20h6"/>' },
+  { id: 'color', label: 'Color', icon: '<circle cx="9" cy="8" r="4"/><circle cx="15" cy="8" r="4"/><circle cx="12" cy="14" r="4"/>' },
+  { id: 'material', label: 'Material', icon: '<path d="m12 3 9 5-9 5-9-5zM3 12l9 5 9-5M3 16l9 5 9-5"/>' },
+  { id: 'temperature', label: 'Light Temperature', icon: '<path d="M10 14V5a2 2 0 0 1 4 0v9a4 4 0 1 1-4 0ZM12 8v9M17 6h3M17 10h2"/>' },
+]
+
 document.querySelector('#app').innerHTML = `
   <div class="site-shell">
     <header class="site-header">
@@ -71,8 +78,24 @@ document.querySelector('#app').innerHTML = `
           <span id="light-label">Light on</span>
         </button>
         <p class="model-count"><span id="model-index">01</span> / 04</p>
-        <div class="immersive-palette color-row" role="group" aria-label="Lamp colors">
-          ${paletteButtons()}
+        <div class="immersive-dock">
+          <section class="immersive-popup" id="immersive-popup" aria-labelledby="immersive-popup-title" hidden>
+            <div class="immersive-popup-heading">
+              <h2 id="immersive-popup-title">Model</h2>
+              <div class="immersive-popup-actions">
+                <button id="close-immersive-popup" type="button" aria-label="Close options">×</button>
+              </div>
+            </div>
+            <div class="immersive-popup-content"></div>
+          </section>
+          <div class="immersive-bar" role="group" aria-label="Lamp configuration">
+            ${immersiveCategories.map(({ id, label, icon }) => `
+              <button type="button" class="immersive-tool" data-panel="${id}" aria-controls="immersive-popup" aria-expanded="false">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icon}</svg>
+                <span>${label}</span>
+              </button>
+            `).join('')}
+          </div>
         </div>
       </section>
 
@@ -448,7 +471,75 @@ document.querySelector('#reset-view').addEventListener('click', () => {
 
 const immersiveTrigger = document.querySelector('#immersive-trigger')
 const immersiveExit = document.querySelector('#immersive-exit')
+const immersiveDock = document.querySelector('.immersive-dock')
+const immersivePopup = document.querySelector('#immersive-popup')
+const popupContent = document.querySelector('.immersive-popup-content')
+const popupActions = document.querySelector('.immersive-popup-actions')
+const lightToggle = document.querySelector('#light-toggle')
+const panelControls = {
+  model: document.querySelector('.model-grid'),
+  color: document.querySelector('.color-row'),
+  material: document.querySelector('.material-grid'),
+  temperature: document.querySelector('.temperature-control'),
+}
+// Move the original controls into the popup, retaining their listeners and state.
+const controlHomes = new Map()
+for (const element of [...Object.values(panelControls), lightToggle]) {
+  const home = document.createComment('Control home')
+  element.before(home)
+  controlHomes.set(element, home)
+}
+let activePanel = null
 let savedView = null
+
+function restoreControl(element) {
+  controlHomes.get(element).after(element)
+}
+
+function closeImmersivePopup(restoreFocus = true) {
+  if (!activePanel) return
+  const trigger = document.querySelector(`[data-panel="${activePanel}"]`)
+  restoreControl(panelControls[activePanel])
+  restoreControl(lightToggle)
+  activePanel = null
+  immersivePopup.hidden = true
+  trigger.setAttribute('aria-expanded', 'false')
+  if (restoreFocus) trigger.focus({ preventScroll: true })
+  layoutImmersiveView()
+}
+
+function toggleImmersivePopup(id) {
+  const wasOpen = activePanel === id
+  closeImmersivePopup(false)
+  if (wasOpen) return
+  activePanel = id
+  document.querySelector('#immersive-popup-title').textContent =
+    immersiveCategories.find((category) => category.id === id).label
+  popupContent.append(panelControls[id])
+  if (id === 'temperature') popupActions.prepend(lightToggle)
+  immersivePopup.hidden = false
+  document.querySelector(`[data-panel="${id}"]`).setAttribute('aria-expanded', 'true')
+  layoutImmersiveView()
+  const selected = popupContent.querySelector('.is-selected') ||
+    popupContent.querySelector('input:not(:disabled), button') || lightToggle
+  selected.focus({ preventScroll: true })
+}
+
+function layoutImmersiveView() {
+  if (!document.body.classList.contains('is-immersive')) return
+  const viewerBounds = document.querySelector('.viewer').getBoundingClientRect()
+  const dockBounds = immersiveDock.getBoundingClientRect()
+  // Short landscape screens put the dock beside the scene to retain lamp size.
+  if (window.matchMedia('(max-height: 500px) and (min-aspect-ratio: 3/2)').matches) {
+    canvasWrap.style.right = `${viewerBounds.right - dockBounds.left + 24}px`
+    canvasWrap.style.bottom = '24px'
+  } else {
+    canvasWrap.style.removeProperty('right')
+    // Give the whole dock its own space, including when a popup grows on mobile.
+    canvasWrap.style.bottom = `${viewerBounds.bottom - dockBounds.top + 24}px`
+  }
+  resize()
+}
 
 function enterImmersiveView() {
   if (document.body.classList.contains('is-immersive')) return
@@ -464,25 +555,46 @@ function enterImmersiveView() {
   controls.maxDistance = 14
 
   document.body.classList.add('is-immersive')
+  // The immersive scene has no floor, so its shadow cannot clip at the dock.
+  floor.visible = false
+  document.querySelector('.controls').inert = true
+  document.querySelector('.site-header').inert = true
   immersiveTrigger.setAttribute('aria-expanded', 'true')
   requestAnimationFrame(() => {
-    resize()
+    layoutImmersiveView()
     frameLampForImmersive()
     immersiveExit.focus()
   })
 }
 
 function frameLampForImmersive() {
+  if (!document.body.classList.contains('is-immersive')) return
+  // Fit the final size, rather than the temporary model-reveal animation scale.
   const bounds = new THREE.Box3().setFromObject(lampRoot)
+  bounds.min.divideScalar(lampRoot.scale.x)
+  bounds.max.divideScalar(lampRoot.scale.x)
   const center = bounds.getCenter(new THREE.Vector3())
-  const size = bounds.getSize(new THREE.Vector3())
   const viewingDirection = camera.position.clone().sub(controls.target).normalize()
+  const right = new THREE.Vector3().crossVectors(camera.up, viewingDirection).normalize()
+  const up = new THREE.Vector3().crossVectors(viewingDirection, right).normalize()
   const verticalFov = THREE.MathUtils.degToRad(camera.fov)
-  const horizontalFov = 2 * Math.atan(Math.tan(verticalFov / 2) * camera.aspect)
-  const verticalDistance = (size.y / 2) / Math.tan(verticalFov / 2)
-  const horizontalDistance = (size.x / 2) / Math.tan(horizontalFov / 2)
-  const distance = Math.max(verticalDistance, horizontalDistance) * 1.18 + size.z * 0.25
+  const verticalSlope = Math.tan(verticalFov / 2)
+  const horizontalSlope = verticalSlope * camera.aspect
+  let distance = 0
+  for (const x of [bounds.min.x, bounds.max.x]) {
+    for (const y of [bounds.min.y, bounds.max.y]) {
+      for (const z of [bounds.min.z, bounds.max.z]) {
+        const corner = new THREE.Vector3(x, y, z).sub(center)
+        const depth = corner.dot(viewingDirection)
+        distance = Math.max(distance,
+          depth + Math.abs(corner.dot(up)) * 1.16 / verticalSlope,
+          depth + Math.abs(corner.dot(right)) * 1.16 / horizontalSlope)
+      }
+    }
+  }
 
+  controls.minDistance = Math.min(5.5, distance * 0.65)
+  controls.maxDistance = Math.max(14, distance * 2)
   controls.target.copy(center)
   camera.position.copy(center).add(viewingDirection.multiplyScalar(distance))
   controls.update()
@@ -491,7 +603,13 @@ function frameLampForImmersive() {
 function exitImmersiveView() {
   if (!document.body.classList.contains('is-immersive')) return
 
+  closeImmersivePopup(false)
   document.body.classList.remove('is-immersive')
+  canvasWrap.style.removeProperty('bottom')
+  canvasWrap.style.removeProperty('right')
+  floor.visible = true
+  document.querySelector('.controls').inert = false
+  document.querySelector('.site-header').inert = false
   immersiveTrigger.setAttribute('aria-expanded', 'false')
 
   if (savedView) {
@@ -510,20 +628,38 @@ function exitImmersiveView() {
 
 immersiveTrigger.addEventListener('click', enterImmersiveView)
 immersiveExit.addEventListener('click', exitImmersiveView)
+document.querySelectorAll('[data-panel]').forEach((button) => {
+  button.addEventListener('click', () => toggleImmersivePopup(button.dataset.panel))
+})
+document.querySelector('#close-immersive-popup').addEventListener('click', () => closeImmersivePopup())
+document.addEventListener('pointerdown', (event) => {
+  if (activePanel && !immersiveDock.contains(event.target)) closeImmersivePopup(false)
+})
 document.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape') exitImmersiveView()
+  if (event.key !== 'Escape') return
+  if (activePanel) closeImmersivePopup()
+  else exitImmersiveView()
 })
 
+let canvasWidth = 0
+let canvasHeight = 0
 function resize() {
-  const width = canvasWrap.clientWidth
-  const height = canvasWrap.clientHeight
+  const { width, height } = canvasWrap.getBoundingClientRect()
+  if (!width || !height || (width === canvasWidth && height === canvasHeight)) return
+  canvasWidth = width
+  canvasHeight = height
   renderer.setSize(width, height, false)
   camera.aspect = width / height
   camera.updateProjectionMatrix()
+  frameLampForImmersive()
 }
 
-window.addEventListener('resize', resize)
+window.addEventListener('resize', () => {
+  if (document.body.classList.contains('is-immersive')) layoutImmersiveView()
+  else resize()
+})
 new ResizeObserver(resize).observe(canvasWrap)
+new ResizeObserver(layoutImmersiveView).observe(immersiveDock)
 
 function animate() {
   requestAnimationFrame(animate)
