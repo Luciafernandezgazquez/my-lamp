@@ -6,7 +6,8 @@ export function lightTemperature(value) {
   const position = Math.max(0, Math.min(100, value))
   const warm = new Color('#FFE6AD')
   const neutral = new Color('#FFFFFF')
-  const cool = new Color('#DCE8FF')
+  // A near-white endpoint keeps the cool light crisp without a blue cast.
+  const cool = new Color('#F4F7FF')
   const tint = position <= 50
     ? warm.lerp(neutral, position / 50)
     : neutral.lerp(cool, (position - 50) / 50)

@@ -211,6 +211,7 @@ scene.add(floor)
 const lampRoot = new THREE.Group()
 scene.add(lampRoot)
 let lampLight
+let lampBulb
 let revealScale = 1
 
 function finishMaterial(color, materialId) {
@@ -261,12 +262,12 @@ function addGlow(y, size = 0.58) {
     emissiveIntensity: state.lightOn ? 2.2 : 0,
     roughness: 0.2,
   })
-  const bulb = addMesh(new THREE.SphereGeometry(size, 48, 32), glowMaterial, [0, y, 0])
-  bulb.userData.isBulb = true
+  lampBulb = addMesh(new THREE.SphereGeometry(size, 48, 32), glowMaterial, [0, y, 0])
+  lampBulb.userData.isBulb = true
   lampLight = new THREE.PointLight(0xffb25e, state.lightOn ? 7 : 0, 8, 1.8)
   lampLight.position.set(0, y - 0.1, 0)
   lampRoot.add(lampLight)
-  return bulb
+  return lampBulb
 }
 
 function buildDome(material, accent, trim, cable) {
@@ -274,10 +275,9 @@ function buildDome(material, accent, trim, cable) {
   addMesh(new THREE.CylinderGeometry(0.43, 0.56, 0.78, 48), accent, [0, 0.92, 0])
   addMesh(new THREE.CylinderGeometry(1.45, 1.82, 1.08, 64, 1, true), material, [0, -0.02, 0])
   addMesh(new THREE.TorusGeometry(1.81, 0.055, 16, 64), trim, [0, -0.56, 0], [Math.PI / 2, 0, 0])
-  const diffuser = addMesh(new THREE.CircleGeometry(1.7, 64),
-    new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.4, side: THREE.DoubleSide }),
+  // The broad underside is a finished surface, separate from the glowing bulb.
+  addMesh(new THREE.CircleGeometry(1.7, 64), trim,
     [0, -0.555, 0], [Math.PI / 2, 0, 0])
-  diffuser.userData.isBulb = true
   addGlow(-0.72, 0.44)
 }
 
@@ -343,6 +343,7 @@ function disposeLamp() {
 function buildLamp() {
   disposeLamp()
   lampLight = null
+  lampBulb = null
   const finishes = state.shades.map((color, slot) => {
     const finish = finishMaterial(color, slot === 1 && state.material.id === 'crystal' ? 'shine' : state.material.id)
     finish.userData.colorSlot = slot
@@ -374,12 +375,12 @@ function updateLight() {
     lampLight.color.copy(color)
     lampLight.intensity = state.lightOn ? 7 : 0
   }
-  lampRoot.traverse((child) => {
-    if (child.userData.isBulb) {
-      child.material.emissive.copy(color)
-      child.material.emissiveIntensity = state.lightOn ? 2.2 : 0
-    }
-  })
+  // Only the dedicated bulb emits light. Painted parts retain their complete
+  // finish, including base color and emissive settings, at every temperature.
+  if (lampBulb) {
+    lampBulb.material.emissive.copy(color)
+    lampBulb.material.emissiveIntensity = state.lightOn ? 2.2 : 0
+  }
   document.querySelector('#light-toggle').classList.toggle('is-on', state.lightOn)
   document.querySelector('#light-toggle').setAttribute('aria-pressed', state.lightOn)
   document.querySelector('#light-label').textContent = state.lightOn ? 'Light on' : 'Light off'

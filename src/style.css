@@ -597,7 +597,7 @@ body.is-immersive .immersive-popup .light-toggle {
 #temperature::-webkit-slider-runnable-track {
   height: 5px;
   border-radius: 100px;
-  background: linear-gradient(90deg, #ffe6ad, #ffffff 50%, #dce8ff);
+  background: linear-gradient(90deg, #ffe6ad, #ffffff 50%, #f4f7ff);
 }
 #temperature::-webkit-slider-thumb {
   width: 18px;
@@ -612,7 +612,7 @@ body.is-immersive .immersive-popup .light-toggle {
 #temperature::-moz-range-track {
   height: 5px;
   border-radius: 100px;
-  background: linear-gradient(90deg, #ffe6ad, #ffffff 50%, #dce8ff);
+  background: linear-gradient(90deg, #ffe6ad, #ffffff 50%, #f4f7ff);
 }
 #temperature::-moz-range-thumb {
   width: 15px;
