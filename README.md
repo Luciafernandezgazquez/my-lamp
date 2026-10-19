@@ -1,6 +1,6 @@
 # Stap — Light with character
 
-An interactive 3D lamp configurator for a playful, contemporary lighting brand. Visitors can choose a sculptural lamp, coordinate its colors, explore different finishes, and adjust its glow in a responsive viewer.
+An interactive 3D lamp configurator for a playful, contemporary lighting brand. Visitors can choose a sculptural lamp, coordinate its colors, explore different finishes, adjust its glow, and draw a personal design directly on its surface.
 
 The application runs entirely in the browser. It is a product configurator prototype with a price display; it does not include a shopping cart, checkout, accounts, or a backend.
 
@@ -44,6 +44,7 @@ For phone testing, use your computer's local network address and the port printe
 3. Choose a **Material**: Ceramic, Crystal, Matte, or Shine.
 4. Switch the lamp on and adjust **Light temperature** from warm through neutral to cool white.
 5. Drag the lamp to rotate it. Use the mouse wheel or a touch pinch to zoom. The desktop viewer also provides **Reset view**.
+6. Open **Pattern Studio** to decorate the lamp with watercolor, lines, or polka dots.
 
 The initial configuration is **Dome / Yellow / Ceramic**, with the light on and the temperature slider at **32**, displayed as approximately **3550K**. Its displayed price is **€355**.
 
@@ -54,12 +55,28 @@ Selections survive entry to and exit from immersive view. They are held in memor
 Use the circular button at the top-right of the page to fill the browser viewport with the lamp viewer. This expands the page layout without invoking the browser's native fullscreen API.
 
 - The model name remains at the top-left, with an exit button at the top-right.
-- Four icon buttons provide **Model**, **Color**, **Material**, and **Light Temperature** controls.
+- Five icon buttons provide **Model**, **Color**, **Material**, **Light Temperature**, and **Pattern Studio** controls.
 - Each button opens a compact popup. Only one popup is open at a time.
 - Click outside, use the popup's close button, or press **Escape** to close a popup. Pressing Escape with no popup open exits immersive view.
 - The light on/off button is available inside the Light Temperature popup.
 - The camera and viewer resize to leave room for the controls. On short landscape screens, the controls sit beside the lamp.
 - Exiting restores the regular layout and its saved camera view, while retaining the chosen configuration.
+
+### Pattern Studio
+
+Open the studio from the configuration panel or the immersive toolbar. On smaller screens, the normal-panel button opens the immersive studio to keep the lamp and tools together. On desktop, immersive drawing tools sit beside the lamp.
+
+- **Draw** paints with a mouse or finger and locks camera rotation. **Rotate** enables dragging and wheel/pinch zoom without making marks.
+- **Watercolor** has soft, slightly irregular edges and fine grain. Its translucent strokes darken when overlapped.
+- **Lines** draws continuous strokes. **Polka dots** places one dot per tap/click, or evenly spaced dots while dragging.
+- Choose a preset ink or any custom color, adjust **Tool size**, and use **Dot spacing** to change the distance between dots.
+- **Eraser** removes artwork while preserving the selected base color and material.
+- **Undo/Redo** works per stroke, including erasing and clearing. Shortcuts are Ctrl/Cmd+Z and Ctrl/Cmd+Shift+Z (or Ctrl+Y). History retains up to 30 actions, with a memory budget that may retain fewer large actions.
+- **Clear drawing** asks for confirmation and can be undone. Switching models also asks for confirmation when artwork exists; confirming removes that model's drawing and undo history.
+
+Artwork stays attached during rotation and zoom and survives closing the studio, changing palettes or finishes, and entering/leaving immersive view. The bulb is excluded from drawing. Clicking the viewer keeps the studio open; use Done, the popup close button, or Escape to close it.
+
+Artwork is held in memory for the current page session. Reloading clears it; there is no save/export feature yet.
 
 ## Colors and materials
 
@@ -137,6 +154,9 @@ my-product/
 │   ├── palettes.js            Color families and Mixed color generation
 │   ├── light-temperature.js   Temperature interpolation and luminance normalization
 │   ├── ceramic-material.js    Ceramic shader and studio reflection environment
+│   ├── surface-paint.js       Surface projection, paint atlases, gestures, and undo history
+│   ├── pattern-studio.js      Drawing controls and confirmation dialogs
+│   ├── pattern-studio.css     Studio layout and tool styling
 │   ├── counter.js             Unused Vite starter example
 │   └── assets/                Starter assets; not used by the configurator
 └── dist/                      Generated production build; ignored by Git
@@ -172,6 +192,7 @@ The intended typeface is **Neue Haas Grotesk Display Pro**, using Roman and Ligh
 | Palettes and Mixed behavior | `src/palettes.js`. Keep four shades per palette to preserve part assignments. |
 | Material finishes | `finishMaterial()` and the Glass model treatment in `src/main.js`. |
 | Ceramic grain, glaze, and reflections | `src/ceramic-material.js`. |
+| Drawing brushes, projection, and history | `src/surface-paint.js`; controls in `src/pattern-studio.js` and `src/pattern-studio.css`. |
 | Light temperature and displayed Kelvin values | `src/light-temperature.js`; keep the slider gradients in `src/style.css` consistent with its endpoint colors. |
 | Layout and responsive behavior | `src/style.css`; immersive layout and camera framing functions in `src/main.js`. |
 | Page title and description | `index.html`. |
@@ -179,6 +200,8 @@ The intended typeface is **Neue Haas Grotesk Display Pro**, using Roman and Ligh
 Customizable materials carry `userData.colorSlot`, which maps them to one of the four palette shades. Keep the bulb material separate from painted surfaces when adding models or finishes. Immersive popups move the existing controls between layouts rather than duplicating their state or event handlers.
 
 The ceramic implementation extends Three.js shader chunks through `onBeforeCompile`. After upgrading Three.js, verify the ceramic shader in a browser as well as running the production build.
+
+Pattern Studio adds transparent paint atlases through the material shader while retaining the original surface finish. Pointer rays select the nearest visible surface; brush footprints are clipped to its triangles and projected into UV space. Cylinder caps have separate atlas regions, and double-sided surfaces have separate front/back sheets. New primitives need non-overlapping UVs. Mesh order and UV layout must stay consistent across finish rebuilds to preserve artwork. Atlases are allocated only on painted parts, and undo history records changed tiles rather than full images.
 
 ## Build and deployment
 
@@ -208,6 +231,9 @@ There are currently no automated test or lint scripts configured in `package.jso
 - Immersive popups switch and dismiss correctly; exiting preserves selections and restores the normal view.
 - Portrait, landscape, and desktop layouts keep controls usable and the lamp correctly framed.
 - Ceramic grain remains subtle and stable during rotation and zoom, with no visible seams or sparkling.
+- All drawing tools work on mouse and touch; Draw locks rotation and Rotate makes no marks.
+- Artwork stays on the decorated surface without appearing on opposite sides or cylinder caps.
+- Undo/redo, erasing, clear confirmation, and model-switch confirmation work; palette, material, and view changes retain artwork.
 
 | Issue | What to check |
 | --- | --- |

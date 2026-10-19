@@ -1,9 +1,11 @@
 import './style.css'
+import './pattern-studio.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { palettes, mixedShades } from './palettes.js'
 import { lightTemperature } from './light-temperature.js'
 import { createCeramicEnvironment, createCeramicMaterial } from './ceramic-material.js'
+import { createPatternStudio } from './pattern-studio.js'
 
 const models = [
   { id: 'dome', name: 'Dome', price: 320 },
@@ -48,6 +50,7 @@ const immersiveCategories = [
   { id: 'color', label: 'Color', icon: '<circle cx="9" cy="8" r="4"/><circle cx="15" cy="8" r="4"/><circle cx="12" cy="14" r="4"/>' },
   { id: 'material', label: 'Material', icon: '<path d="m12 3 9 5-9 5-9-5zM3 12l9 5 9-5M3 16l9 5 9-5"/>' },
   { id: 'temperature', label: 'Light Temperature', icon: '<path d="M10 14V5a2 2 0 0 1 4 0v9a4 4 0 1 1-4 0ZM12 8v9M17 6h3M17 10h2"/>' },
+  { id: 'pattern', label: 'Pattern Studio', icon: '<path d="m14 4 6 6-9 9H5v-6zM12 6l6 6M4 21h16"/>' },
 ]
 
 document.querySelector('#app').innerHTML = `
@@ -148,6 +151,12 @@ document.querySelector('#app').innerHTML = `
           <p id="temperature-help" class="sr-only">Turn on the lamp to adjust its light temperature.</p>
         </section>
 
+        <section class="control-section pattern-entry">
+          <div class="section-title"><span>05</span><h3>Pattern Studio</h3></div>
+          <p>Paint a little personality. Add your own brushstrokes, lines, and dots.</p>
+          <button id="open-pattern-studio" type="button" aria-expanded="false" aria-controls="pattern-panel">✎ Open Pattern Studio</button>
+        </section>
+        <section class="pattern-panel" id="pattern-panel" aria-label="Pattern Studio" hidden></section>
         <div class="purchase-row">
           <div class="price"><span>Final price</span><strong id="price">€355</strong></div>
         </div>
@@ -214,6 +223,8 @@ scene.add(lampRoot)
 let lampLight
 let lampBulb
 let revealScale = 1
+let normalStudioOpen = false
+const studio = createPatternStudio({ canvas: renderer.domElement, camera, controls, root: lampRoot, onClose: closePatternStudio })
 
 function finishMaterial(color, materialId) {
   const base = new THREE.Color(color)
@@ -375,6 +386,7 @@ function buildLamp() {
   })
   const builders = { dome: buildDome, orbit: buildOrbit, tier: buildTier, glass: buildGlass }
   builders[state.model.id](...finishes)
+  studio.paint.bind()
 
   lampRoot.rotation.y = -0.32
   revealScale = 0.84
@@ -425,7 +437,15 @@ function selectGroup(selector, selected) {
 }
 
 document.querySelectorAll('[data-model]').forEach((button) => {
-  button.addEventListener('click', () => {
+  button.addEventListener('click', async () => {
+    if (state.model.id === button.dataset.model) return
+    studio.paint.finishStroke()
+    if (studio.paint.hasArtwork() && !await studio.confirm({
+      title: 'Switch lamp model?',
+      copy: 'Your drawing fits this lamp’s surfaces. Switching models will remove it and its undo history. Your colors, finish, and light settings will stay.',
+      action: 'Switch model',
+    })) return
+    studio.paint.reset()
     state.model = models.find((model) => model.id === button.dataset.model)
     selectGroup('[data-model]', button)
     buildLamp()
@@ -505,6 +525,7 @@ const panelControls = {
   color: document.querySelector('.color-row'),
   material: document.querySelector('.material-grid'),
   temperature: document.querySelector('.temperature-control'),
+  pattern: studio.panel,
 }
 // Move the original controls into the popup, retaining their listeners and state.
 const controlHomes = new Map()
@@ -524,8 +545,13 @@ function closeImmersivePopup(restoreFocus = true) {
   if (!activePanel) return
   const trigger = document.querySelector(`[data-panel="${activePanel}"]`)
   restoreControl(panelControls[activePanel])
+  if (activePanel === 'pattern') {
+    studio.panel.hidden = true
+    studio.paint.setOpen(false)
+  }
   restoreControl(lightToggle)
   activePanel = null
+  immersiveDock.classList.remove('has-pattern')
   immersivePopup.hidden = true
   trigger.setAttribute('aria-expanded', 'false')
   if (restoreFocus) trigger.focus({ preventScroll: true })
@@ -537,24 +563,58 @@ function toggleImmersivePopup(id) {
   closeImmersivePopup(false)
   if (wasOpen) return
   activePanel = id
+  immersiveDock.classList.toggle('has-pattern', id === 'pattern')
   document.querySelector('#immersive-popup-title').textContent =
     immersiveCategories.find((category) => category.id === id).label
   popupContent.append(panelControls[id])
+  if (id === 'pattern') {
+    studio.panel.hidden = false
+    studio.paint.setOpen(true)
+  }
   if (id === 'temperature') popupActions.prepend(lightToggle)
   immersivePopup.hidden = false
+  immersivePopup.classList.toggle('is-pattern-popup', id === 'pattern')
   document.querySelector(`[data-panel="${id}"]`).setAttribute('aria-expanded', 'true')
   layoutImmersiveView()
-  const selected = popupContent.querySelector('.is-selected') ||
+  const selected = popupContent.querySelector('[data-paint-mode][aria-pressed="true"]') || popupContent.querySelector('.is-selected') ||
     popupContent.querySelector('input:not(:disabled), button') || lightToggle
   selected.focus({ preventScroll: true })
 }
+
+function closePatternStudio() {
+  if (document.body.classList.contains('is-immersive')) closeImmersivePopup()
+  else {
+    normalStudioOpen = false
+    studio.panel.hidden = true
+    studio.paint.setOpen(false)
+    document.querySelector('.controls').classList.remove('is-pattern-studio')
+    document.querySelector('#open-pattern-studio').setAttribute('aria-expanded', 'false')
+    document.querySelector('#open-pattern-studio').focus({ preventScroll: true })
+  }
+}
+
+document.querySelector('#open-pattern-studio').addEventListener('click', () => {
+  // On narrow screens, keep the lamp and drawing tools together in the viewport.
+  if (window.matchMedia('(max-width: 1100px)').matches) {
+    enterImmersiveView()
+    toggleImmersivePopup('pattern')
+    return
+  }
+  normalStudioOpen = true
+  studio.panel.hidden = false
+  document.querySelector('.controls').classList.add('is-pattern-studio')
+  document.querySelector('#open-pattern-studio').setAttribute('aria-expanded', 'true')
+  studio.paint.setOpen(true)
+  studio.panel.querySelector('[data-paint-mode="draw"]').focus()
+})
 
 function layoutImmersiveView() {
   if (!document.body.classList.contains('is-immersive')) return
   const viewerBounds = document.querySelector('.viewer').getBoundingClientRect()
   const dockBounds = immersiveDock.getBoundingClientRect()
   // Short landscape screens put the dock beside the scene to retain lamp size.
-  if (window.matchMedia('(max-height: 500px) and (min-aspect-ratio: 3/2)').matches) {
+  if (window.matchMedia('(max-height: 500px) and (min-aspect-ratio: 3/2)').matches ||
+      (activePanel === 'pattern' && window.matchMedia('(min-width: 900px)').matches)) {
     canvasWrap.style.right = `${viewerBounds.right - dockBounds.left + 24}px`
     canvasWrap.style.bottom = '24px'
   } else {
@@ -584,6 +644,7 @@ function enterImmersiveView() {
   document.querySelector('.controls').inert = true
   document.querySelector('.site-header').inert = true
   immersiveTrigger.setAttribute('aria-expanded', 'true')
+  if (normalStudioOpen) toggleImmersivePopup('pattern')
   requestAnimationFrame(() => {
     layoutImmersiveView()
     frameLampForImmersive()
@@ -634,6 +695,8 @@ function exitImmersiveView() {
   floor.visible = true
   document.querySelector('.controls').inert = false
   document.querySelector('.site-header').inert = false
+  studio.panel.hidden = !normalStudioOpen
+  studio.paint.setOpen(normalStudioOpen)
   immersiveTrigger.setAttribute('aria-expanded', 'false')
 
   if (savedView) {
@@ -657,11 +720,15 @@ document.querySelectorAll('[data-panel]').forEach((button) => {
 })
 document.querySelector('#close-immersive-popup').addEventListener('click', () => closeImmersivePopup())
 document.addEventListener('pointerdown', (event) => {
+  if (studio.confirming) return
+  if (activePanel === 'pattern' && canvasWrap.contains(event.target)) return
   if (activePanel && !immersiveDock.contains(event.target)) closeImmersivePopup(false)
 })
 document.addEventListener('keydown', (event) => {
   if (event.key !== 'Escape') return
+  if (studio.confirming) return
   if (activePanel) closeImmersivePopup()
+  else if (normalStudioOpen && !document.body.classList.contains('is-immersive')) closePatternStudio()
   else exitImmersiveView()
 })
 
@@ -679,6 +746,8 @@ function resize() {
 }
 
 window.addEventListener('resize', () => {
+  if (normalStudioOpen && !document.body.classList.contains('is-immersive') &&
+      window.matchMedia('(max-width: 1100px)').matches) enterImmersiveView()
   if (document.body.classList.contains('is-immersive')) layoutImmersiveView()
   else resize()
 })

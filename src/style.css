@@ -441,7 +441,7 @@ body.is-immersive .immersive-dock {
 }
 .immersive-bar {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   gap: 4px;
   padding: 6px;
 }
@@ -471,6 +471,7 @@ body.is-immersive .immersive-dock {
   overscroll-behavior: contain;
 }
 .immersive-popup[hidden] { display: none; }
+.immersive-popup.is-pattern-popup { max-height: min(365px, 46dvh); }
 .immersive-popup-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; margin-bottom: 10px; }
 .immersive-popup-heading h2 { margin: 0; font-size: 15px; font-weight: 400; letter-spacing: -.02em; }
 .immersive-popup-actions { display: flex; align-items: center; gap: 8px; }
