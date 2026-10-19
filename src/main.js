@@ -78,7 +78,6 @@ document.querySelector('#app').innerHTML = `
           <span class="light-toggle__icon" aria-hidden="true">✦</span>
           <span id="light-label">Light on</span>
         </button>
-        <p class="model-count"><span id="model-index">01</span> / 04</p>
         <div class="immersive-dock">
           <section class="immersive-popup" id="immersive-popup" aria-labelledby="immersive-popup-title" hidden>
             <div class="immersive-popup-heading">
@@ -393,7 +392,6 @@ function updateLight() {
 function updateSummary() {
   const index = models.indexOf(state.model) + 1
   document.querySelector('#lamp-title').innerHTML = `${state.model.name} <span>0${index}</span>`
-  document.querySelector('#model-index').textContent = `0${index}`
   document.querySelector('#price').textContent = `€${state.model.price + state.material.price}`
 }
 
