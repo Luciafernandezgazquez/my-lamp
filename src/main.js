@@ -275,11 +275,13 @@ function addGlow(y, size = 0.58) {
 
 function buildDome(material, accent, trim, cable) {
   addCable(1.28, cable)
-  addMesh(new THREE.CylinderGeometry(0.43, 0.56, 0.78, 48), accent, [0, 0.92, 0])
+  addMesh(new THREE.CylinderGeometry(0.43, 0.56, 0.78, 48), accent, [0, 0.905, 0])
+  // Close the shade's open shoulder so the neck seats on an actual surface.
+  addMesh(new THREE.CylinderGeometry(1.45, 1.467, 0.05, 64), material, [0, 0.505, 0])
   addMesh(new THREE.CylinderGeometry(1.45, 1.82, 1.08, 64, 1, true), material, [0, -0.02, 0])
   addMesh(new THREE.TorusGeometry(1.81, 0.055, 16, 64), trim, [0, -0.56, 0], [Math.PI / 2, 0, 0])
   // The broad underside is a finished surface, separate from the glowing bulb.
-  addMesh(new THREE.CircleGeometry(1.7, 64), trim,
+  addMesh(new THREE.CircleGeometry(1.81, 64), trim,
     [0, -0.555, 0], [Math.PI / 2, 0, 0])
   addGlow(-0.72, 0.44)
 }
@@ -287,6 +289,8 @@ function buildDome(material, accent, trim, cable) {
 function buildOrbit(material, accent, trim, cable) {
   addCable(1.22, cable)
   addMesh(new THREE.SphereGeometry(0.38, 48, 32), accent, [0, 0.92, 0])
+  // A short hub joins the upper ball to the body through the decorative ring.
+  addMesh(new THREE.CylinderGeometry(0.24, 0.24, 0.47, 40), accent, [0, 0.485, 0])
   addMesh(new THREE.TorusGeometry(0.72, 0.19, 24, 64), trim, [0, 0.46, 0], [Math.PI / 2, 0, 0])
   addMesh(new THREE.SphereGeometry(1.35, 64, 32), material, [0, -0.08, 0], [0, 0, 0], [1.24, 0.34, 1.24])
   addMesh(new THREE.TorusGeometry(1.45, 0.08, 18, 64), trim, [0, -0.08, 0], [Math.PI / 2, 0, 0])
@@ -294,17 +298,31 @@ function buildOrbit(material, accent, trim, cable) {
 }
 
 function buildTier(material, accent, trim, cable) {
+  // Keep the shade sizes; seat each one slightly inside the shade above it.
+  const jointOverlap = 0.015
+  const topY = 0.7
+  const topHeight = 0.36
+  const middleHeight = 0.4
+  const lowerHeight = 0.54
+  const middleY = topY - topHeight / 2 - middleHeight / 2 + jointOverlap
+  const lowerY = middleY - middleHeight / 2 - lowerHeight / 2 + jointOverlap
+  const stemBottom = topY + topHeight / 2 - jointOverlap
+  const stemTop = 1.365
   addCable(1.35, cable)
-  addMesh(new THREE.CylinderGeometry(0.22, 0.28, 0.34, 40), accent, [0, 1.18, 0])
-  addMesh(new THREE.CylinderGeometry(1.54, 1.54, 0.36, 64), material, [0, 0.7, 0])
-  addMesh(new THREE.CylinderGeometry(1.2, 1.2, 0.4, 64), accent, [0, 0.2, 0])
-  addMesh(new THREE.CylinderGeometry(0.78, 0.78, 0.54, 64), trim, [0, -0.31, 0])
+  addMesh(new THREE.CylinderGeometry(0.22, 0.28, stemTop - stemBottom, 40), accent, [0, (stemTop + stemBottom) / 2, 0])
+  addMesh(new THREE.CylinderGeometry(1.54, 1.54, topHeight, 64), material, [0, topY, 0])
+  addMesh(new THREE.CylinderGeometry(1.2, 1.2, middleHeight, 64), accent, [0, middleY, 0])
+  addMesh(new THREE.CylinderGeometry(0.78, 0.78, lowerHeight, 64), trim, [0, lowerY, 0])
   addGlow(-0.72, 0.48)
 }
 
 function buildGlass(material, accent, trim, cable) {
-  addCable(1.74, cable)
+  addCable(1.67, cable)
   addMesh(new THREE.SphereGeometry(0.36, 48, 32), accent, [0, 1.47, 0], [0, 0, 0], [1.15, 0.6, 1.15])
+  // Fill the collar's central opening and seat it over the shade's mouth.
+  const neckBottom = 0.93
+  const neckTop = 1.43
+  addMesh(new THREE.CylinderGeometry(0.38, 0.38, neckTop - neckBottom, 48), accent, [0, (neckTop + neckBottom) / 2, 0])
   addMesh(new THREE.TorusGeometry(0.48, 0.13, 22, 64), trim, [0, 1.08, 0], [Math.PI / 2, 0, 0])
 
   const points = [
@@ -330,7 +348,10 @@ function buildGlass(material, accent, trim, cable) {
       })
   glassMaterial.userData.colorSlot = 0
   addMesh(new THREE.LatheGeometry(points, 72), glassMaterial, [0, -0.08, 0])
-  addMesh(new THREE.CylinderGeometry(0.22, 0.22, 1.45, 32), accent, [0, -0.14, 0])
+  // The internal stem reaches the neck and ends just inside the bulb.
+  const stemBottom = -0.4
+  const stemTop = neckBottom + 0.03
+  addMesh(new THREE.CylinderGeometry(0.22, 0.22, stemTop - stemBottom, 32), accent, [0, (stemTop + stemBottom) / 2, 0])
   addGlow(-0.72, 0.36)
 }
 
