@@ -4,6 +4,22 @@ An interactive 3D lamp configurator for a playful, contemporary lighting brand. 
 
 The application runs entirely in the browser. It is a product configurator prototype with a price display; it does not include a shopping cart, checkout, accounts, or a backend.
 
+## Current layout
+
+The regular configurator follows [LAYOUT_2.jpg](public/assets/LAYOUT_2.jpg), designed at **1440 × 1024**: a circular cream viewer, numbered outline pills, circular choices, a centered headline, and the eye-shaped immersive button. Model, Color, and Material sit on the left; Light Temperature, Studio, and Background sit on the right. On smaller screens the viewer moves above a two-column control layout.
+
+The reference's placeholder headline is retained verbatim. All **four** existing material finishes remain available, although the reference illustrates three swatches. The initial Dome / Yellow / Ceramic configuration is unchanged; the reference illustrates a different Glass configuration. The live models, palettes, lighting, and surface finishes retain their existing behavior.
+
+The regular view uses the reference's color-family swatches; immersive Color options display the four actual shades in each palette. Mixed updates its preview after each click. Selection dots identify active model, color, and material choices without changing the reference's button shapes.
+
+- Click the **04.** badge to turn the lamp on/off. Its tooltip and accessible label describe the current action; the temperature slider dims when off.
+- **start now** opens Pattern Studio.
+- **Background** changes only the viewer backdrop. Click the selected swatch again to return to cream. The chosen background survives view changes.
+- Hover or focus the desktop viewer to reveal **Reset view**, rotation guidance, and the current price below the circle. These remain visible on smaller screens.
+- The normal camera fits the complete lamp body, with its suspension cord continuing to the circle's top edge as in the reference. Immersive view fits the entire model, including the cord.
+
+Git checkpoint **`90f270a`** preserves the working configurator and supplied reference before this redesign.
+
 ## Getting started
 
 ### Requirements
@@ -59,7 +75,7 @@ Use the circular button at the top-right of the page to fill the browser viewpor
 - Each button opens a compact popup. Only one popup is open at a time.
 - Click outside, use the popup's close button, or press **Escape** to close a popup. Pressing Escape with no popup open exits immersive view.
 - The light on/off button is available inside the Light Temperature popup.
-- The camera and viewer resize to leave room for the controls. On short landscape screens, the controls sit beside the lamp.
+- The camera and viewer resize to leave room for the controls. On short landscape screens, the controls sit beside the lamp. The selected background becomes a plain backdrop in this view.
 - Exiting restores the regular layout and its saved camera view, while retaining the chosen configuration.
 
 ### Pattern Studio
@@ -119,7 +135,7 @@ Switching the light off disables and dims the slider. Switching it back on resto
 
 ### Displayed pricing
 
-The displayed total is the model price plus the finish surcharge, defined in [src/main.js](src/main.js).
+The displayed total is the model price plus the finish surcharge, defined in [src/main.js](src/main.js). It appears with the regular viewer's auxiliary controls on hover/focus, and remains visible on smaller screens.
 
 | Model | Base price |
 | --- | --- |
@@ -151,6 +167,7 @@ my-product/
 ├── src/
 │   ├── main.js                UI, shared state, lamp geometry, scene, and interactions
 │   ├── style.css              Layout, typography, controls, and responsive styles
+│   ├── layout.css             LAYOUT_2 presentation, circular viewer, and responsive placement
 │   ├── palettes.js            Color families and Mixed color generation
 │   ├── light-temperature.js   Temperature interpolation and luminance normalization
 │   ├── ceramic-material.js    Ceramic shader and studio reflection environment
@@ -171,6 +188,7 @@ The app uses **vanilla JavaScript ES modules**, **CSS**, **Vite 8**, and **Three
 | Reference | Purpose |
 | --- | --- |
 | [LAYOUT.jpg](public/assets/LAYOUT.jpg) | Viewer and configuration-panel layout. |
+| [LAYOUT_2.jpg](public/assets/LAYOUT_2.jpg) | Current visual source of truth: desktop layout, typography, buttons, circular backdrop, and material thumbnails. |
 | [LAMPS.png](public/assets/LAMPS.png) | Sculptural lamp silhouettes. |
 | [LAYOUT-1.jpg](public/assets/LAYOUT-1.jpg) | Original color direction. |
 | [LIGHTING.jpg](public/assets/LIGHTING.jpg) | Warm, soft lighting from the left. |
@@ -181,7 +199,7 @@ The app uses **vanilla JavaScript ES modules**, **CSS**, **Vite 8**, and **Three
 | [ceramic-reference-02.jpg](public/assets/ceramic-reference-02.jpg) | Glaze and soft reflections. |
 | [ceramic-reference-03.jpg](public/assets/ceramic-reference-03.jpg) | Subtle surface imperfections. |
 
-The intended typeface is **Neue Haas Grotesk Display Pro**, using Roman and Light weights. CSS requests that family, then falls back to Helvetica Neue, Helvetica, Arial, and sans-serif. Font files and `@font-face` declarations are not currently bundled, so appearance depends on locally available fonts.
+The current interface uses **Arial** to match the supplied layout's letterforms and spacing. The logo uses locally installed Neue Haas Display Roman/Light through `@font-face` local sources, with Helvetica Neue, Helvetica, and Arial fallbacks. No font binaries or third-party font requests are bundled. Logo metrics may vary on machines without those local fonts.
 
 ## Making changes
 
@@ -194,7 +212,8 @@ The intended typeface is **Neue Haas Grotesk Display Pro**, using Roman and Ligh
 | Ceramic grain, glaze, and reflections | `src/ceramic-material.js`. |
 | Drawing brushes, projection, and history | `src/surface-paint.js`; controls in `src/pattern-studio.js` and `src/pattern-studio.css`. |
 | Light temperature and displayed Kelvin values | `src/light-temperature.js`; keep the slider gradients in `src/style.css` consistent with its endpoint colors. |
-| Layout and responsive behavior | `src/style.css`; immersive layout and camera framing functions in `src/main.js`. |
+| Current layout and responsive behavior | `src/layout.css`, loaded after the existing component styles; immersive placement and camera framing functions in `src/main.js`. |
+| Headline, numbered sections, and background choices | The page template and background handler in `src/main.js`. |
 | Page title and description | `index.html`. |
 
 Customizable materials carry `userData.colorSlot`, which maps them to one of the four palette shades. Keep the bulb material separate from painted surfaces when adding models or finishes. Immersive popups move the existing controls between layouts rather than duplicating their state or event handlers.
@@ -230,6 +249,8 @@ There are currently no automated test or lint scripts configured in `package.jso
 - Mouse and touch controls work, and slider dragging does not rotate the lamp.
 - Immersive popups switch and dismiss correctly; exiting preserves selections and restores the normal view.
 - Portrait, landscape, and desktop layouts keep controls usable and the lamp correctly framed.
+- Compare the regular view against `public/assets/LAYOUT_2.jpg` at 1440 × 1024; check the circle and numbered groups against the reference coordinates.
+- Background changes preserve all lamp settings, and the 04. light toggle stays connected when controls move into immersive view.
 - Ceramic grain remains subtle and stable during rotation and zoom, with no visible seams or sparkling.
 - All drawing tools work on mouse and touch; Draw locks rotation and Rotate makes no marks.
 - Artwork stays on the decorated surface without appearing on opposite sides or cylinder caps.

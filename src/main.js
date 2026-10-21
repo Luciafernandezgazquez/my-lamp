@@ -1,5 +1,6 @@
 import './style.css'
 import './pattern-studio.css'
+import './layout.css'
 import * as THREE from 'three'
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js'
 import { palettes, mixedShades } from './palettes.js'
@@ -28,6 +29,7 @@ const state = {
   material: materials[0],
   temperature: 32,
   lightOn: true,
+  background: 'cream',
 }
 
 const modelIcon = (id) => `
@@ -36,11 +38,11 @@ const modelIcon = (id) => `
   </span>
 `
 
-const paletteButtons = () => palettes.map(({ id, name, shades }) => `
+const paletteButtons = () => ['yellow', 'pink', 'blue', 'mixed', 'white', 'black'].map(id => palettes.find(palette => palette.id === id)).map(({ id, name, shades }) => `
   <button class="color-option${state.palette === id ? ' is-selected' : ''}"
     type="button" aria-pressed="${state.palette === id}" data-palette="${id}"
-    title="${id === 'mixed' ? 'Generate a new combination every time' : name}">
-    <span class="palette-swatch" aria-hidden="true" style="background: linear-gradient(90deg, ${shades.map((shade, i) => `${shade} ${i * 25}% ${(i + 1) * 25}%`).join(', ')})"></span>
+    aria-label="${name}" title="${id === 'mixed' ? 'Mixed colors — generate a new combination' : name}">
+    <span class="palette-swatch" aria-hidden="true" style="--swatch-color:${shades[0]};background: linear-gradient(180deg, ${(id === 'mixed' ? ['#A9B3DD', '#F3C482', '#FFD6DC', '#D9F2CD'] : shades).map((shade, i) => `${shade} ${i * 25}% ${(i + 1) * 25}%`).join(', ')})"></span>
     <span>${name}</span>
   </button>
 `).join('')
@@ -57,17 +59,17 @@ document.querySelector('#app').innerHTML = `
   <div class="site-shell">
     <header class="site-header">
       <a class="logo" href="#" aria-label="Stap lighting home"><span>sta</span><span>p</span></a>
-      <p>Lighting with character</p>
-      <button class="menu-button" id="immersive-trigger" type="button" aria-label="Open immersive lamp view" aria-expanded="false"><span></span><span></span></button>
+      <div class="header-rule" aria-hidden="true"></div>
+      <button class="menu-button" id="immersive-trigger" type="button" aria-label="Open immersive lamp view" title="Open immersive view" aria-expanded="false"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 16s4.5-9 13-9 13 9 13 9-4.5 9-13 9S3 16 3 16Z"/><circle cx="16" cy="16" r="4.5"/></svg></button>
     </header>
-
+    <h1 class="page-title">Lorem ipsum dolor sit amet consectetur.</h1>
     <main class="configurator">
       <section class="viewer" aria-label="Interactive 3D lamp viewer">
         <div class="viewer-copy">
           <p class="eyebrow">Your light, your mood</p>
-          <h1 id="lamp-title">Dome <span>01</span></h1>
+          <h2 id="lamp-title">Dome <span>01</span></h2>
         </div>
-        <div class="warm-wash" aria-hidden="true"></div>
+        <div class="scene-backdrop" aria-hidden="true"><span></span><span></span></div>
         <div class="canvas-wrap" id="canvas-wrap"></div>
         <button class="immersive-exit" id="immersive-exit" type="button" aria-label="Exit immersive view">
           <span aria-hidden="true"></span>
@@ -76,11 +78,8 @@ document.querySelector('#app').innerHTML = `
         <div class="viewer-toolbar">
           <p><span class="drag-icon" aria-hidden="true">↔</span> Drag to rotate</p>
           <button id="reset-view" type="button">Reset view</button>
+          <p class="viewer-price"><span>Final price</span> <strong id="price">€355</strong></p>
         </div>
-        <button class="light-toggle is-on" id="light-toggle" type="button" aria-pressed="true">
-          <span class="light-toggle__icon" aria-hidden="true">✦</span>
-          <span id="light-label">Light on</span>
-        </button>
         <div class="immersive-dock">
           <section class="immersive-popup" id="immersive-popup" aria-labelledby="immersive-popup-title" hidden>
             <div class="immersive-popup-heading">
@@ -103,19 +102,11 @@ document.querySelector('#app').innerHTML = `
       </section>
 
       <aside class="controls" aria-label="Lamp configuration">
-        <div class="controls-heading">
-          <div>
-            <p class="eyebrow">Build your own</p>
-            <h2>Make it yours.</h2>
-          </div>
-          <p class="intro">Choose a shape, finish and glow that brings your room to life.</p>
-        </div>
-
-        <section class="control-section">
-          <div class="section-title"><span>01</span><h3>Model</h3></div>
+        <section class="control-section model-control">
+          <div class="section-title"><span>01.</span><h3>Model</h3></div>
           <div class="model-grid" role="radiogroup" aria-label="Lamp model">
             ${models.map((model, index) => `
-              <button class="model-option${index === 0 ? ' is-selected' : ''}" type="button" role="radio" aria-checked="${index === 0}" data-model="${model.id}">
+              <button class="model-option${index === 0 ? ' is-selected' : ''}" type="button" role="radio" aria-label="${model.name}" title="${model.name}" aria-checked="${index === 0}" data-model="${model.id}">
                 ${modelIcon(model.id)}
                 <span>${model.name}</span>
                 <small>0${index + 1}</small>
@@ -124,42 +115,47 @@ document.querySelector('#app').innerHTML = `
           </div>
         </section>
 
-        <section class="control-section control-section--split">
-          <div>
-            <div class="section-title"><span>02</span><h3>Color</h3></div>
+        <section class="control-section color-control">
+            <div class="section-title"><span>02.</span><h3>Color</h3></div>
             <div class="color-row" role="group" aria-label="Lamp colors">
               ${paletteButtons()}
             </div>
-          </div>
-          <div>
-            <div class="section-title"><span>03</span><h3>Material</h3></div>
+        </section>
+        <section class="control-section material-control">
+            <div class="section-title"><span>03.</span><h3>Material</h3></div>
             <div class="material-grid" role="radiogroup" aria-label="Lamp material">
               ${materials.map((material, index) => `
-                <button class="material-option${index === 0 ? ' is-selected' : ''}" type="button" role="radio" aria-checked="${index === 0}" data-material="${material.id}">
+                <button class="material-option${index === 0 ? ' is-selected' : ''}" type="button" role="radio" aria-label="${material.name}" title="${material.name}" aria-checked="${index === 0}" data-material="${material.id}">
                   <i class="material-sample material-sample--${material.id}"></i>
                   <span>${material.name}</span>
                 </button>
               `).join('')}
             </div>
-          </div>
         </section>
 
         <section class="control-section temperature-control">
-          <div class="section-title"><span>04</span><h3>Light temperature</h3><output id="temperature-value" for="temperature">3550K</output></div>
+          <div class="section-title">
+            <button class="light-toggle is-on" id="light-toggle" type="button" aria-pressed="true" aria-label="Turn lamp light off" title="Light on — click to switch off">
+              <span class="light-toggle__icon" aria-hidden="true">04.</span><span id="light-label">Light on</span>
+            </button>
+            <h3>Light temperature</h3><output id="temperature-value" for="temperature">3550K</output>
+          </div>
           <input id="temperature" type="range" min="0" max="100" step="0.1" value="32" aria-label="Light temperature" aria-describedby="temperature-help">
           <div class="range-labels"><span>Warm</span><span>Neutral</span><span>Cool</span></div>
           <p id="temperature-help" class="sr-only">Turn on the lamp to adjust its light temperature.</p>
         </section>
 
         <section class="control-section pattern-entry">
-          <div class="section-title"><span>05</span><h3>Pattern Studio</h3></div>
-          <p>Paint a little personality. Add your own brushstrokes, lines, and dots.</p>
-          <button id="open-pattern-studio" type="button" aria-expanded="false" aria-controls="pattern-panel">✎ Open Pattern Studio</button>
+          <div class="section-title"><span>05.</span><h3>Studio</h3></div>
+          <button id="open-pattern-studio" type="button" aria-label="Start Pattern Studio" aria-expanded="false" aria-controls="pattern-panel">start now</button>
+        </section>
+        <section class="control-section background-control">
+          <div class="section-title"><span>06.</span><h3>Background</h3></div>
+          <div class="background-options" role="group" aria-label="Viewer background">
+            ${[{id:'pink', name:'Pink', color:'#FFD6DC'}, {id:'blue', name:'Periwinkle', color:'#C5D0FF'}, {id:'peach', name:'Peach', color:'#F3C482'}].map(({id,name,color}) => `<button type="button" data-background="${id}" aria-label="${name} background" aria-pressed="false" title="${name} background — click again for cream" style="--background-swatch:${color}"></button>`).join('')}
+          </div>
         </section>
         <section class="pattern-panel" id="pattern-panel" aria-label="Pattern Studio" hidden></section>
-        <div class="purchase-row">
-          <div class="price"><span>Final price</span><strong id="price">€355</strong></div>
-        </div>
       </aside>
     </main>
     <p id="color-status" class="sr-only" role="status"></p>
@@ -216,6 +212,8 @@ const floor = new THREE.Mesh(
 floor.rotation.x = -Math.PI / 2
 floor.position.y = -2.72
 floor.receiveShadow = true
+// The reference uses a flat, graphic shadow inside the circular backdrop.
+floor.visible = false
 scene.add(floor)
 
 const lampRoot = new THREE.Group()
@@ -375,7 +373,7 @@ function disposeLamp() {
   }
 }
 
-function buildLamp() {
+function buildLamp({ reframe = true } = {}) {
   disposeLamp()
   lampLight = null
   lampBulb = null
@@ -391,9 +389,7 @@ function buildLamp() {
   lampRoot.rotation.y = -0.32
   revealScale = 0.84
   updateLight()
-  if (document.body.classList.contains('is-immersive')) {
-    requestAnimationFrame(frameLampForImmersive)
-  }
+  if (reframe) requestAnimationFrame(() => document.body.classList.contains('is-immersive') ? frameLampForImmersive() : frameLampForNormal())
 }
 
 function updateLight() {
@@ -420,6 +416,8 @@ function updateLight() {
   document.querySelector('#light-toggle').classList.toggle('is-on', state.lightOn)
   document.querySelector('#light-toggle').setAttribute('aria-pressed', state.lightOn)
   document.querySelector('#light-label').textContent = state.lightOn ? 'Light on' : 'Light off'
+  document.querySelector('#light-toggle').setAttribute('aria-label', state.lightOn ? 'Turn lamp light off' : 'Turn lamp light on')
+  document.querySelector('#light-toggle').title = state.lightOn ? 'Light on — click to switch off' : 'Light off — click to switch on'
 }
 
 function updateSummary() {
@@ -469,7 +467,7 @@ document.querySelectorAll('[data-palette]').forEach((button) => {
       option.setAttribute('aria-pressed', selected)
       if (option.dataset.palette === 'mixed' && state.palette === 'mixed') {
         option.querySelector('.palette-swatch').style.background =
-          `linear-gradient(90deg, ${state.shades.map((shade, i) => `${shade} ${i * 25}% ${(i + 1) * 25}%`).join(', ')})`
+          `linear-gradient(180deg, ${state.shades.map((shade, i) => `${shade} ${i * 25}% ${(i + 1) * 25}%`).join(', ')})`
       }
     })
     document.querySelector('#color-status').textContent = palette.id === 'mixed'
@@ -482,7 +480,7 @@ document.querySelectorAll('[data-material]').forEach((button) => {
   button.addEventListener('click', () => {
     state.material = materials.find((material) => material.id === button.dataset.material)
     selectGroup('[data-material]', button)
-    buildLamp()
+    buildLamp({ reframe: false })
     updateSummary()
   })
 })
@@ -511,7 +509,15 @@ document.querySelector('#reset-view').addEventListener('click', () => {
   camera.position.set(5.2, 1.1, 8.5)
   controls.target.set(0, -0.25, 0)
   controls.update()
+  frameLampForNormal()
 })
+
+document.querySelectorAll('[data-background]').forEach(button => button.addEventListener('click', () => {
+  state.background = state.background === button.dataset.background ? 'cream' : button.dataset.background
+  const colors = { cream: '#FFFBE5', pink: '#FFD6DC', blue: '#C5D0FF', peach: '#F3C482' }
+  document.documentElement.style.setProperty('--scene-color', colors[state.background])
+  document.querySelectorAll('[data-background]').forEach(option => option.setAttribute('aria-pressed', option.dataset.background === state.background))
+}))
 
 const immersiveTrigger = document.querySelector('#immersive-trigger')
 const immersiveExit = document.querySelector('#immersive-exit')
@@ -685,6 +691,47 @@ function frameLampForImmersive() {
   controls.update()
 }
 
+function frameLampForNormal() {
+  if (document.body.classList.contains('is-immersive') || !lampRoot.children.length) return
+  lampRoot.updateMatrixWorld(true)
+  // In the reference, the suspension cord continues to the circle's upper
+  // edge. Fit the complete lamp body and let the existing cord hang from it.
+  const parts = lampRoot.children.filter(mesh => mesh.geometry && mesh.material?.userData.colorSlot !== 3)
+  const bounds = new THREE.Box3()
+  parts.forEach(mesh => bounds.expandByObject(mesh))
+  bounds.min.divideScalar(lampRoot.scale.x)
+  bounds.max.divideScalar(lampRoot.scale.x)
+  const center = bounds.getCenter(new THREE.Vector3())
+  const size = bounds.getSize(new THREE.Vector3())
+  // Lift the composition within the circle, leaving the reference's lower space.
+  center.y -= size.y * 0.03
+  const direction = camera.position.clone().sub(controls.target).normalize()
+  const right = new THREE.Vector3().crossVectors(camera.up, direction).normalize()
+  const up = new THREE.Vector3().crossVectors(direction, right).normalize()
+  const slope = Math.tan(THREE.MathUtils.degToRad(camera.fov / 2))
+  let distance = 0
+  const point = new THREE.Vector3()
+  // Fit the actual silhouette rather than an oversized box around the cable
+  // and shade. Leave more space below the lamp, as in the reference artwork.
+  for (const mesh of parts) {
+    const positions = mesh.geometry?.attributes.position
+    if (!positions) continue
+    for (let i = 0; i < positions.count; i++) {
+      point.fromBufferAttribute(positions, i).applyMatrix4(mesh.matrixWorld).divideScalar(lampRoot.scale.x).sub(center)
+      const vertical = point.dot(up)
+      distance = Math.max(distance, point.dot(direction) + Math.max(
+        Math.abs(vertical) / (slope * (vertical > 0 ? .71 : .68)),
+        Math.abs(point.dot(right)) / (slope * camera.aspect * .84),
+      ))
+    }
+  }
+  controls.target.copy(center)
+  controls.minDistance = distance * 0.55
+  controls.maxDistance = distance * 2
+  camera.position.copy(center).addScaledVector(direction, distance)
+  controls.update()
+}
+
 function exitImmersiveView() {
   if (!document.body.classList.contains('is-immersive')) return
 
@@ -692,7 +739,7 @@ function exitImmersiveView() {
   document.body.classList.remove('is-immersive')
   canvasWrap.style.removeProperty('bottom')
   canvasWrap.style.removeProperty('right')
-  floor.visible = true
+  floor.visible = false
   document.querySelector('.controls').inert = false
   document.querySelector('.site-header').inert = false
   studio.panel.hidden = !normalStudioOpen
@@ -708,7 +755,7 @@ function exitImmersiveView() {
   }
 
   requestAnimationFrame(() => {
-    resize()
+    resize(true)
     immersiveTrigger.focus()
   })
 }
@@ -734,7 +781,7 @@ document.addEventListener('keydown', (event) => {
 
 let canvasWidth = 0
 let canvasHeight = 0
-function resize() {
+function resize(preserveView = false) {
   const { width, height } = canvasWrap.getBoundingClientRect()
   if (!width || !height || (width === canvasWidth && height === canvasHeight)) return
   canvasWidth = width
@@ -742,7 +789,8 @@ function resize() {
   renderer.setSize(width, height, false)
   camera.aspect = width / height
   camera.updateProjectionMatrix()
-  frameLampForImmersive()
+  if (document.body.classList.contains('is-immersive')) frameLampForImmersive()
+  else if (!preserveView) frameLampForNormal()
 }
 
 window.addEventListener('resize', () => {
@@ -751,7 +799,7 @@ window.addEventListener('resize', () => {
   if (document.body.classList.contains('is-immersive')) layoutImmersiveView()
   else resize()
 })
-new ResizeObserver(resize).observe(canvasWrap)
+new ResizeObserver(() => resize()).observe(canvasWrap)
 new ResizeObserver(layoutImmersiveView).observe(immersiveDock)
 
 function animate() {
