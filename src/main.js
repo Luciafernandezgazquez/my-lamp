@@ -180,6 +180,8 @@ camera.position.set(5.2, 1.1, 8.5)
 
 const controls = new OrbitControls(camera, renderer.domElement)
 controls.enableDamping = true
+controls.autoRotate = true
+controls.autoRotateSpeed = 1.5 // One full revolution every 40 seconds.
 controls.enablePan = false
 controls.minDistance = 6
 controls.maxDistance = 13
@@ -810,9 +812,14 @@ window.addEventListener('resize', () => {
 new ResizeObserver(() => resize()).observe(canvasWrap)
 new ResizeObserver(layoutImmersiveView).observe(immersiveDock)
 
-function animate() {
+let previousFrameTime
+function animate(time = performance.now()) {
   requestAnimationFrame(animate)
-  controls.update()
+  const delta = previousFrameTime === undefined ? 0 : Math.min((time - previousFrameTime) / 1000, 0.1)
+  previousFrameTime = time
+  // Keep the surface still in Draw mode; resume automatically in Rotate mode.
+  controls.autoRotate = controls.enabled
+  if (controls.enabled) controls.update(delta)
   revealScale += (1 - revealScale) * 0.08
   lampRoot.scale.setScalar(revealScale)
   renderer.render(scene, camera)
