@@ -11,9 +11,13 @@
 #open-pattern-studio { width: 100%; background: var(--yellow); border-color: var(--ink); }
 .pattern-panel[hidden] { display: none; }
 .controls.is-pattern-studio > :not(.pattern-panel) { display: none; }
-.pattern-panel { display: grid; gap: 16px; padding: 8px 2px; }
+.pattern-panel { display: grid; grid-template-columns: minmax(0, 1fr); gap: 12px; padding: 8px 2px; min-width: 0; }
+.pattern-panel > * { min-width: 0; max-width: 100%; }
+.pattern-panel button { min-width: 0; }
 .studio-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
-.studio-heading h3 { font-size: 30px; letter-spacing: -.04em; }
+.studio-heading h3 { margin: 0; font-size: clamp(20px, 2vw, 28px); letter-spacing: -.04em; line-height: 1.1; }
+.studio-heading > div { min-width: 0; }
+.studio-heading > button { flex-shrink: 0; }
 .studio-modes { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 4px; background: var(--soft); border-radius: 15px; }
 .pattern-panel .studio-modes button { background: transparent; border-color: transparent; }
 .pattern-panel .studio-modes button[aria-pressed="true"] { background: var(--ink); color: white; }
@@ -25,11 +29,13 @@
 .brush-preview--lines { background: repeating-linear-gradient(115deg, transparent 0 6px, #929fd5 6px 9px, transparent 9px 12px); }
 .brush-preview--dots { background: radial-gradient(circle, #d9819f 3px, transparent 3.5px) 0 0 / 10px 10px; }
 .brush-preview--eraser { width: 22px; height: 15px; margin: 2px; border: 1px solid var(--ink); border-radius: 4px; transform: rotate(-30deg); background: linear-gradient(90deg, #e2afb6 55%, white 55%); }
-.studio-colors { display: flex; justify-content: space-between; align-items: center; gap: 6px; }
+.studio-colors { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); align-items: center; gap: 3px; }
 .pattern-panel .studio-colors button { flex: 1; min-width: 0; min-height: 34px; padding: 5px; border-radius: 50%; border-color: transparent; background: transparent; }
 .studio-colors button::before { content: ''; display: block; margin: auto; width: 23px; height: 23px; border-radius: 50%; background: var(--ink-color); box-shadow: inset 0 0 0 1px #00000020; }
 .pattern-panel .studio-colors button[aria-pressed="true"] { border-color: var(--ink); }
-.custom-ink { display: flex; flex: 0 0 34px; height: 34px; padding: 4px; border: 1px dashed var(--ink); border-radius: 50%; overflow: hidden; cursor: pointer; }
+.custom-ink { display: flex; width: 100%; max-width: 34px; min-width: 0; height: 30px; padding: 4px; border: 1px dashed var(--ink); border-radius: 50%; overflow: hidden; cursor: pointer; }
+.pattern-panel .studio-colors button { padding: 2px; }
+.studio-colors button::before { width: min(23px, 100%); aspect-ratio: 1; height: auto; }
 .custom-ink input { width: 100%; height: 100%; padding: 0; border: 0; background: transparent; cursor: pointer; }
 .custom-ink input::-webkit-color-swatch-wrapper { padding: 0; }
 .custom-ink input::-webkit-color-swatch { border: 0; border-radius: 50%; }

@@ -64,6 +64,7 @@ document.querySelector('#app').innerHTML = `
     <h1 class="page-title">Make light your own.</h1>
     <main class="configurator">
       <section class="viewer" aria-label="Interactive 3D lamp viewer">
+        <a class="logo studio-home" href="#" aria-label="Return to Stap configurator"><span>sta</span><span>p</span></a>
         <div class="viewer-copy">
           <p class="eyebrow">Your light, your mood</p>
           <h2 id="lamp-title">Dome <span>01</span></h2>
@@ -595,6 +596,16 @@ function closePatternStudio() {
     document.querySelector('#open-pattern-studio').focus({ preventScroll: true })
   }
 }
+
+document.querySelectorAll('.logo').forEach((logo) => {
+  logo.addEventListener('click', (event) => {
+    event.preventDefault()
+    // Return without rebuilding the lamp or discarding its painted artwork.
+    normalStudioOpen = false
+    exitImmersiveView()
+    closePatternStudio()
+  })
+})
 
 document.querySelector('#open-pattern-studio').addEventListener('click', () => {
   // On narrow screens, keep the lamp and drawing tools together in the viewport.
