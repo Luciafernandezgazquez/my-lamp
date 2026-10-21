@@ -229,7 +229,7 @@ body { min-height: 100dvh; }
 .background-options button[aria-pressed="true"] { outline: 1px solid var(--ink); outline-offset: 4px; }
 body:not(.is-immersive) .viewer {
   grid-area: 1 / 2 / 4 / 3;
-  width: min(100%, calc(100cqh - 40px));
+  width: min(100%, calc(100cqh - 72px));
   height: auto;
   aspect-ratio: 1;
   min-height: 0;
@@ -238,7 +238,7 @@ body:not(.is-immersive) .viewer {
   overflow: visible;
   align-self: center;
   justify-self: center;
-  margin-bottom: 28px;
+  margin-bottom: 60px;
 }
 .viewer::before { display: none; }
 .scene-backdrop {
@@ -256,7 +256,7 @@ body:not(.is-immersive) .viewer {
 /* Mask only the scene, keeping the toolbar and all interface controls outside. */
 body:not(.is-immersive) .canvas-wrap { border-radius: 50%; clip-path: circle(50% at 50% 50%); }
 body:not(.is-immersive) .viewer-copy { display: none; }
-body:not(.is-immersive) .viewer-toolbar { left: 50%; bottom: -32px; transform: translateX(-50%); white-space: nowrap; opacity: 1; gap: 10px; }
+body:not(.is-immersive) .viewer-toolbar { left: 50%; top: calc(100% + 20px); bottom: auto; transform: translateX(-50%); white-space: nowrap; opacity: 1; gap: 10px; }
 body:not(.is-immersive) .viewer:hover .viewer-toolbar,
 body:not(.is-immersive) .viewer:focus-within .viewer-toolbar { opacity: 1; }
 .viewer-toolbar .viewer-price { font-size: 10px; letter-spacing: 0; text-transform: none; }
@@ -277,7 +277,7 @@ body.is-immersive .immersive-popup .light-toggle__icon::after { content: '⏻'; 
   .menu-button { width: 48px; height: 48px; }
   .page-title { margin-top: 12px; padding-left: 0; font-size: 34px; line-height: 1.2; }
   .configurator { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: auto; gap: 44px 32px; margin-top: 48px; }
-  body:not(.is-immersive) .viewer { grid-area: 1 / 1 / 2 / -1; width: min(100%, 600px); justify-self: center; margin-bottom: 20px; }
+  body:not(.is-immersive) .viewer { grid-area: 1 / 1 / 2 / -1; width: min(100%, 600px); justify-self: center; margin-bottom: 60px; }
   .controls > .control-section { grid-area: auto; justify-self: start; width: auto; margin: 0; }
   .controls .section-title { margin-bottom: 24px; }
   .controls .temperature-control h3 { width: 242px; }
@@ -295,8 +295,8 @@ body.is-immersive .immersive-popup .light-toggle__icon::after { content: '⏻'; 
   .menu-button svg { width: 28px; height: 28px; }
   .page-title { margin-top: 20px; font-size: 27px; line-height: 1.2; }
   .configurator { margin-top: 36px; gap: 36px 20px; }
-  body:not(.is-immersive) .viewer { width: 100%; margin-bottom: 12px; }
-  body:not(.is-immersive) .viewer-toolbar { opacity: 1; bottom: -30px; }
+  body:not(.is-immersive) .viewer { width: 100%; margin-bottom: 60px; }
+  body:not(.is-immersive) .viewer-toolbar { opacity: 1; bottom: auto; }
   .viewer-toolbar p { font-size: 8px; letter-spacing: .04em; }
   .viewer-toolbar { gap: 10px; }
   .viewer-toolbar .viewer-price { font-size: 9px; }

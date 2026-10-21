@@ -77,7 +77,6 @@ document.querySelector('#app').innerHTML = `
         <div class="viewer-toolbar">
           <p><span class="drag-icon" aria-hidden="true">↔</span> Drag to rotate</p>
           <button id="reset-view" type="button">Reset view</button>
-          <p class="viewer-price"><span>Final price</span> <strong id="price">€355</strong></p>
         </div>
         <div class="immersive-dock">
           <section class="immersive-popup" id="immersive-popup" aria-labelledby="immersive-popup-title" hidden>
@@ -422,7 +421,6 @@ function updateLight() {
 function updateSummary() {
   const index = models.indexOf(state.model) + 1
   document.querySelector('#lamp-title').innerHTML = `${state.model.name} <span>0${index}</span>`
-  document.querySelector('#price').textContent = `€${state.model.price + state.material.price}`
 }
 
 function selectGroup(selector, selected) {
