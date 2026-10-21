@@ -61,7 +61,7 @@ document.querySelector('#app').innerHTML = `
       <div class="header-rule" aria-hidden="true"></div>
       <button class="menu-button" id="immersive-trigger" type="button" aria-label="Open immersive lamp view" title="Open immersive view" aria-expanded="false"><svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 16s4.5-9 13-9 13 9 13 9-4.5 9-13 9S3 16 3 16Z"/><circle cx="16" cy="16" r="4.5"/></svg></button>
     </header>
-    <h1 class="page-title">Lorem ipsum dolor sit amet consectetur.</h1>
+    <h1 class="page-title">Make light your own.</h1>
     <main class="configurator">
       <section class="viewer" aria-label="Interactive 3D lamp viewer">
         <div class="viewer-copy">

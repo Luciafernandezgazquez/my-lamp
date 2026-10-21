@@ -40,10 +40,10 @@ body { min-height: 100dvh; }
 .menu-button svg { width: 32px; height: 32px; }
 .page-title {
   margin: 0;
-  padding: 0;
+  padding: 16px 0 0;
   font-size: clamp(15px, min(3vw, 4dvh), 34px);
   line-height: 1.15;
-  text-align: center;
+  text-align: left;
   font-weight: 400;
   letter-spacing: .005em;
 }

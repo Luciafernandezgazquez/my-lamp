@@ -8,7 +8,7 @@ The application runs entirely in the browser. It is a product configurator proto
 
 The regular configurator follows [LAYOUT_2.jpg](public/assets/LAYOUT_2.jpg), designed at **1440 × 1024**: a circular cream viewer, numbered outline pills, circular choices, a centered headline, and the eye-shaped immersive button. Model, Color, and Material sit on the left; Light Temperature, Studio, and Background sit on the right. On smaller screens the viewer moves above a two-column control layout.
 
-The reference's placeholder headline is retained verbatim. Three material finishes are available: Ceramic, Crystal, and Matte. The initial Dome / Yellow / Ceramic configuration is unchanged; the reference illustrates a different Glass configuration. The live models, palettes, lighting, and surface finishes retain their existing behavior.
+The headline reads “Make light your own.” Three material finishes are available: Ceramic, Crystal, and Matte. The initial Dome / Yellow / Ceramic configuration is unchanged; the reference illustrates a different Glass configuration. The live models, palettes, lighting, and surface finishes retain their existing behavior.
 
 The regular view uses the reference's color-family swatches; immersive Color options display the four actual shades in each palette. Mixed updates its preview after each click. Selection dots identify active model, color, and material choices without changing the reference's button shapes.
 
