@@ -8,7 +8,7 @@ The application runs entirely in the browser. It is a product configurator proto
 
 The regular configurator follows [LAYOUT_2.jpg](public/assets/LAYOUT_2.jpg), designed at **1440 × 1024**: a circular cream viewer, numbered outline pills, circular choices, a centered headline, and the eye-shaped immersive button. Model, Color, and Material sit on the left; Light Temperature, Studio, and Background sit on the right. On smaller screens the viewer moves above a two-column control layout.
 
-The reference's placeholder headline is retained verbatim. All **four** existing material finishes remain available, although the reference illustrates three swatches. The initial Dome / Yellow / Ceramic configuration is unchanged; the reference illustrates a different Glass configuration. The live models, palettes, lighting, and surface finishes retain their existing behavior.
+The reference's placeholder headline is retained verbatim. Three material finishes are available: Ceramic, Crystal, and Matte. The initial Dome / Yellow / Ceramic configuration is unchanged; the reference illustrates a different Glass configuration. The live models, palettes, lighting, and surface finishes retain their existing behavior.
 
 The regular view uses the reference's color-family swatches; immersive Color options display the four actual shades in each palette. Mixed updates its preview after each click. Selection dots identify active model, color, and material choices without changing the reference's button shapes.
 
@@ -57,7 +57,7 @@ For phone testing, use your computer's local network address and the port printe
 
 1. Select a **Model**: Dome, Orbit, Tier, or Glass.
 2. Select a **Color** palette: Pink, Yellow, Blue, White, Black, or Mixed colors.
-3. Choose a **Material**: Ceramic, Crystal, Matte, or Shine.
+3. Choose a **Material**: Ceramic, Crystal, or Matte.
 4. Switch the lamp on and adjust **Light temperature** from warm through neutral to cool white.
 5. Drag the lamp to rotate it. Use the mouse wheel or a touch pinch to zoom. The desktop viewer also provides **Reset view**.
 6. Open **Pattern Studio** to decorate the lamp with watercolor, lines, or polka dots.
@@ -119,7 +119,6 @@ These hex values describe the base material colors. Lighting, reflections, and t
 | Ceramic | Fine procedural grain, shallow imperfections, and a soft reflective glaze. |
 | Crystal | Transparent, light-transmitting material with glossy reflections. |
 | Matte | A rough surface with subdued highlights. |
-| Shine | A smooth, glossy surface with a clearcoat layer. |
 
 Ceramic uses object-space surface detail to avoid UV seams and keep the grain attached to the lamp during rotation. Scaled geometry keeps the grain consistent across differently shaped parts; subpixel detail fades at a distance to reduce shimmer. A shared, neutral studio environment supplies broad reflections. The reference photographs guide the finish and are not applied as color textures.
 

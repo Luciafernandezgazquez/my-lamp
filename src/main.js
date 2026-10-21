@@ -19,7 +19,6 @@ const materials = [
   { id: 'ceramic', name: 'Ceramic', price: 35 },
   { id: 'crystal', name: 'Crystal', price: 90 },
   { id: 'matte', name: 'Matte', price: 0 },
-  { id: 'shine', name: 'Shine', price: 55 },
 ]
 
 const state = {
