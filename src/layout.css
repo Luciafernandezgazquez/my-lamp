@@ -11,7 +11,7 @@
   font-weight: 300;
 }
 :root {
-  --scene-color: #fffbe5;
+  --scene-color: #fdfdfb;
   --layout-unit: clamp(.6px, min(calc((100vw - 48px) / 1360), calc((100dvh - 64px) / 900)), .9px);
   font-family: Arial, 'Helvetica Neue', Helvetica, sans-serif;
   --ink: #080808;
@@ -245,11 +245,8 @@ body:not(.is-immersive) .viewer {
   position: absolute;
   inset: 0;
   border-radius: 50%;
-  background:
-    radial-gradient(ellipse at 18% 12%, #fffef3e6, transparent 52%),
-    linear-gradient(135deg, var(--scene-color) 5%,
-      color-mix(in srgb, var(--scene-color) 65%, #e7bfd5) 52%,
-      color-mix(in srgb, var(--scene-color) 35%, #aabcec) 100%);
+  background: var(--scene-color);
+  border: 1px solid #d6d6d1;
   pointer-events: none;
 }
 .canvas-wrap { overflow: hidden; }
@@ -262,7 +259,7 @@ body:not(.is-immersive) .viewer:focus-within .viewer-toolbar { opacity: 1; }
 .viewer-toolbar .viewer-price { font-size: 10px; letter-spacing: 0; text-transform: none; }
 .viewer-price strong { font-weight: 400; margin-left: 3px; }
 body.is-immersive .page-title { visibility: hidden; }
-body.is-immersive .viewer { background: radial-gradient(ellipse at 20% 10%, #fffef380, transparent 60%), linear-gradient(135deg, var(--scene-color), color-mix(in srgb, var(--scene-color) 60%, #c5d0ff)); }
+body.is-immersive .viewer { background: var(--scene-color); }
 body.is-immersive .scene-backdrop { display: none; }
 #lamp-title { font-size: 38px; line-height: 1; font-weight: 400; }
 #lamp-title span { display: inline-block; margin-left: 8px; font-size: 12px; vertical-align: top; letter-spacing: .04em; }

@@ -153,7 +153,7 @@ document.querySelector('#app').innerHTML = `
         <section class="control-section background-control">
           <div class="section-title"><span>06.</span><h3>Background</h3></div>
           <div class="background-options" role="group" aria-label="Viewer background">
-            ${[{id:'pink', name:'Pink', color:'#FFD6DC'}, {id:'blue', name:'Periwinkle', color:'#C5D0FF'}, {id:'peach', name:'Peach', color:'#F3C482'}].map(({id,name,color}) => `<button type="button" data-background="${id}" aria-label="${name} background" aria-pressed="false" title="${name} background — click again for cream" style="--background-swatch:${color}"></button>`).join('')}
+            ${[{id:'pink', name:'Pink', color:'#FFD6DC'}, {id:'blue', name:'Periwinkle', color:'#C5D0FF'}, {id:'peach', name:'Peach', color:'#F3C482'}].map(({id,name,color}) => `<button type="button" data-background="${id}" aria-label="${name} background" aria-pressed="false" title="${name} background — click again for off-white" style="--background-swatch:${color}"></button>`).join('')}
           </div>
         </section>
         <section class="pattern-panel" id="pattern-panel" aria-label="Pattern Studio" hidden></section>
@@ -569,7 +569,7 @@ document.querySelector('#reset-view').addEventListener('click', () => {
 
 document.querySelectorAll('[data-background]').forEach(button => button.addEventListener('click', () => {
   state.background = state.background === button.dataset.background ? 'cream' : button.dataset.background
-  const colors = { cream: '#FFFBE5', pink: '#FFD6DC', blue: '#C5D0FF', peach: '#F3C482' }
+  const colors = { cream: '#FDFDFB', pink: '#FFD6DC', blue: '#C5D0FF', peach: '#F3C482' }
   document.documentElement.style.setProperty('--scene-color', colors[state.background])
   document.querySelectorAll('[data-background]').forEach(option => option.setAttribute('aria-pressed', option.dataset.background === state.background))
 }))

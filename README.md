@@ -6,7 +6,7 @@ The application runs entirely in the browser. It is a product configurator proto
 
 ## Current layout
 
-The regular configurator follows [LAYOUT_2.jpg](public/assets/LAYOUT_2.jpg), designed at **1440 × 1024**: a circular cream viewer, numbered outline pills, circular choices, a centered headline, and the eye-shaped immersive button. Model, Color, and Material sit on the left; Light Temperature, Studio, and Background sit on the right. On smaller screens the viewer moves above a two-column control layout.
+The regular configurator follows [LAYOUT_2.jpg](public/assets/LAYOUT_2.jpg), designed at **1440 × 1024**: a circular viewer, numbered outline pills, circular choices, a centered headline, and the eye-shaped immersive button. The viewer now uses a plain soft off-white background with a subtle 1px neutral outline, replacing the colored gradients. Model, Color, and Material sit on the left; Light Temperature, Studio, and Background sit on the right. On smaller screens the viewer moves above a two-column control layout.
 
 The headline reads “Make light your own.” Three material finishes are available: Ceramic, Crystal, and Matte. The initial BOP / Yellow / Ceramic configuration is unchanged; the reference illustrates a different PIP configuration. The live models, palettes, lighting, and surface finishes retain their existing behavior.
 
@@ -14,7 +14,7 @@ The regular view uses the reference's color-family swatches; immersive Color opt
 
 - Click the **04.** badge to turn the lamp on/off. Its tooltip and accessible label describe the current action; the temperature slider dims when off.
 - **start now** opens Pattern Studio.
-- **Background** changes only the viewer backdrop. Click the selected swatch again to return to cream. The chosen background survives view changes.
+- **Background** changes only the viewer's flat backdrop color. Click the selected swatch again to return to off-white. The chosen background survives view changes; immersive view also uses a plain fill.
 - Hover or focus the desktop viewer to reveal **Reset view**, rotation guidance, and the current price below the circle. These remain visible on smaller screens.
 - The normal camera fits the complete lamp body, with its suspension cord continuing to the circle's top edge as in the reference. Immersive view fits the entire model, including the cord.
 
