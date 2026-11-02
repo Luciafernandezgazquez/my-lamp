@@ -48,7 +48,7 @@ Run these commands from the project root:
 | `npm ci` | Install the dependency versions recorded in `package-lock.json`. |
 | `npm run dev` | Start the development server with live updates. |
 | `npm run build` | Generate the production website in `dist/`. |
-| `npm test` | Check entrance timing, exact pose restoration, assembly, and reduced-motion behavior. |
+| `npm test` | Check entrance and model-transition timing, pose restoration, rapid selections, and reduced motion. |
 | `npm run preview` | Serve an existing production build locally, normally on port 4173. |
 | `npm run dev -- --host 0.0.0.0` | Make the development server reachable from another device on the same network. |
 
@@ -79,6 +79,14 @@ On first load, the lamp fades in, grows gently to its normal size, and rotates i
 Rotation, zoom, and painting are locked during the reveal. The configuration controls remain available: colors and temperature apply immediately; choosing a model or material, or using Reset view, completes the entrance immediately without replaying it. Opening Pattern Studio during the entrance preserves its selected Draw/Rotate mode when the reveal ends. View changes and resizes continue to fit the final assembled lamp.
 
 With `prefers-reduced-motion: reduce`, the lamp appears immediately in its finished state and automatic rotation is disabled; manual rotation and customization remain available. Enabling reduced motion during the reveal immediately completes it. The animation uses the existing render loop and adds no runtime dependencies.
+
+### Switching models
+
+Selecting a different model plays a **0.9-second horizontal 3D carousel transition**, adapted from the actual video in the [Pinterest reference](https://ca.pinterest.com/pin/286893438754010068/). The outgoing lamp moves sideways and turns away while the incoming lamp approaches from the opposite side and settles at its original scale and orientation. Both remain solid, with a little depth travel and smooth camera framing. Choosing an earlier model reverses the direction. Geometry, component positions, materials, and the page layout are unchanged.
+
+Rotation, zoom, and painting are locked during the transition. Color and lighting controls apply to both visible lamps. Rapid clicks retain only the latest pending selection; at most two lamps exist during the handoff, and the outgoing geometry, materials, and paint textures are released afterward. Clicking the arriving model cancels any pending change. Pattern Studio keeps its existing confirmation before discarding artwork, and returns to its selected Draw/Rotate mode afterward.
+
+Changing material, resetting the camera, resizing, or entering/leaving immersive view immediately settles the latest selected model. Reduced motion switches models immediately. Model changes never replay the initial entrance animation. The transition runs in the existing Three.js render loop without additional dependencies.
 
 ### Immersive view
 
@@ -180,6 +188,7 @@ my-product/
 ├── src/
 │   ├── main.js                UI, shared state, lamp geometry, scene, and interactions
 │   ├── entrance-animation.js  Load-only reveal, assembly offsets, and light timing
+│   ├── model-transition.js    Model carousel, camera blending, and latest-selection queue
 │   ├── style.css              Layout, typography, controls, and responsive styles
 │   ├── layout.css             LAYOUT_2 presentation, circular viewer, and responsive placement
 │   ├── palettes.js            Color families and Mixed color generation
@@ -255,9 +264,10 @@ Files under `public/`, including the moodboard references, are copied into the b
 
 ## Verification and troubleshooting
 
-Run `npm test` for entrance lifecycle and restoration checks, and `npm run build` for the production build. No lint script is configured. After a functional or visual change, also check the following in a browser:
+Run `npm test` for entrance and model-transition lifecycle checks, and `npm run build` for the production build. No lint script is configured. After a functional or visual change, also check the following in a browser:
 
 - The entrance runs once in approximately 3.6 seconds, restores the exact assembled pose, and releases rotation/painting. Check reduced motion, resizing during the reveal, and changing selections before it completes.
+- Model transitions travel in both directions, settle in 0.9 seconds, preserve the final pose, and handle rapid selections without extra lamps. Check temperature/palette changes during motion, artwork confirmation, reduced motion, and drawing after completion.
 
 - All four models and all finishes render without browser-console or WebGL errors.
 - Each palette colors the correct parts; repeated Mixed clicks produce new combinations and matching swatches.

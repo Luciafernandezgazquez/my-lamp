@@ -8,6 +8,7 @@ import { lightTemperature } from './light-temperature.js'
 import { createCeramicEnvironment, createCeramicMaterial } from './ceramic-material.js'
 import { createPatternStudio } from './pattern-studio.js'
 import { createEntranceAnimation } from './entrance-animation.js'
+import { createModelTransition } from './model-transition.js'
 
 const models = [
   { id: 'dome', name: 'BOP', price: 320 },
@@ -235,11 +236,26 @@ const entrance = createEntranceAnimation({
     lightReveal = amount
     applyLampIntensity()
   },
-  onLock(locked) {
-    controls.autoRotate = !locked && !motionPreference.matches && !(studio.paint.open && studio.paint.settings.mode === 'draw')
-    studio.paint.setInteractionLocked(locked)
-  },
+  onLock: setLampInteractionLocked,
 })
+const modelTransition = createModelTransition({
+  root: lampRoot, scene, camera, controls, motionPreference,
+  currentId: () => state.model.id,
+  modelIds: models.map(model => model.id),
+  swap: swapModel,
+  frame: () => document.body.classList.contains('is-immersive') ? frameLampForImmersive() : frameLampForNormal(),
+  dispose: disposeLamp,
+  onLock: setLampInteractionLocked,
+})
+
+function setLampInteractionLocked(locked) {
+  controls.autoRotate = !locked && !motionPreference.matches && !(studio.paint.open && studio.paint.settings.mode === 'draw')
+  studio.paint.setInteractionLocked(locked)
+}
+
+function lampRoots() {
+  return modelTransition.outgoing ? [lampRoot, modelTransition.outgoing] : [lampRoot]
+}
 
 function finishMaterial(color, materialId) {
   const base = new THREE.Color(color)
@@ -381,13 +397,32 @@ function buildGlass(material, accent, trim, cable) {
   addGlow(-0.72, 0.36)
 }
 
-function disposeLamp() {
-  while (lampRoot.children.length) {
-    const child = lampRoot.children.pop()
+function disposeLamp(root = lampRoot) {
+  while (root.children.length) {
+    const child = root.children[0]
+    root.remove(child)
     child.geometry?.dispose()
     if (Array.isArray(child.material)) child.material.forEach((item) => item.dispose())
     else child.material?.dispose()
   }
+  root.userData.paintTextures?.forEach(texture => texture.dispose())
+  delete root.userData.paintTextures
+}
+
+function swapModel(id) {
+  const outgoing = new THREE.Group()
+  outgoing.position.copy(lampRoot.position)
+  outgoing.rotation.copy(lampRoot.rotation)
+  outgoing.scale.copy(lampRoot.scale)
+  for (const part of [...lampRoot.children]) outgoing.add(part)
+  // Keep the confirmed outgoing artwork alive until it leaves the viewer.
+  outgoing.userData.paintTextures = [...studio.paint.records.values()].flatMap(record => record.texture ? [record.texture] : [])
+  studio.paint.reset({ disposeTextures: false })
+  state.model = models.find(model => model.id === id)
+  buildLamp({ reframe: false })
+  selectGroup('[data-model]', document.querySelector(`[data-model="${id}"]`))
+  updateSummary()
+  return outgoing
 }
 
 function buildLamp({ reframe = true } = {}) {
@@ -410,8 +445,10 @@ function buildLamp({ reframe = true } = {}) {
 
 function applyLampIntensity() {
   const amount = state.lightOn ? lightReveal : 0
-  if (lampLight) lampLight.intensity = 7 * amount
-  if (lampBulb) lampBulb.material.emissiveIntensity = 2.2 * amount
+  for (const root of lampRoots()) root.traverse(part => {
+    if (part.isPointLight) part.intensity = 7 * amount
+    if (part.userData.isBulb) part.material.emissiveIntensity = 2.2 * amount
+  })
 }
 
 function updateLight() {
@@ -425,14 +462,12 @@ function updateLight() {
   document.querySelector('#temperature-value').textContent = `${kelvin}K`
   document.documentElement.style.setProperty('--glow-color', `#${tint.getHexString()}`)
   // Studio illumination stays fixed; only the lamp's own light changes.
-  if (lampLight) {
-    lampLight.color.copy(color)
-  }
   // Only the dedicated bulb emits light. Painted parts retain their complete
   // finish, including base color and emissive settings, at every temperature.
-  if (lampBulb) {
-    lampBulb.material.emissive.copy(color)
-  }
+  for (const root of lampRoots()) root.traverse(part => {
+    if (part.isPointLight) part.color.copy(color)
+    if (part.userData.isBulb) part.material.emissive.copy(color)
+  })
   applyLampIntensity()
   document.querySelector('#light-toggle').classList.toggle('is-on', state.lightOn)
   document.querySelector('#light-toggle').setAttribute('aria-pressed', state.lightOn)
@@ -456,18 +491,15 @@ function selectGroup(selector, selected) {
 
 document.querySelectorAll('[data-model]').forEach((button) => {
   button.addEventListener('click', async () => {
-    if (state.model.id === button.dataset.model) return
+    if (studio.confirming || (!modelTransition.active && state.model.id === button.dataset.model)) return
     studio.paint.finishStroke()
     if (studio.paint.hasArtwork() && !await studio.confirm({
       title: 'Switch lamp model?',
       copy: 'Your drawing fits this lamp’s surfaces. Switching models will remove it and its undo history. Your colors, finish, and light settings will stay.',
       action: 'Switch model',
     })) return
-    studio.paint.reset()
-    state.model = models.find((model) => model.id === button.dataset.model)
-    selectGroup('[data-model]', button)
-    buildLamp()
-    updateSummary()
+    entrance.finish()
+    modelTransition.request(button.dataset.model)
   })
 })
 
@@ -477,7 +509,7 @@ document.querySelectorAll('[data-palette]').forEach((button) => {
     state.palette = palette.id
     state.shades = palette.id === 'mixed' ? mixedShades(state.shades) : [...palette.shades]
     // Recolor existing materials: keep geometry, finish, lighting, and camera intact.
-    lampRoot.traverse((part) => {
+    for (const root of lampRoots()) root.traverse((part) => {
       const slot = part.material?.userData.colorSlot
       if (slot !== undefined) part.material.color.set(state.shades[slot])
     })
@@ -498,6 +530,7 @@ document.querySelectorAll('[data-palette]').forEach((button) => {
 
 document.querySelectorAll('[data-material]').forEach((button) => {
   button.addEventListener('click', () => {
+    modelTransition.finish()
     state.material = materials.find((material) => material.id === button.dataset.material)
     selectGroup('[data-material]', button)
     buildLamp({ reframe: false })
@@ -526,6 +559,7 @@ document.querySelector('#light-toggle').addEventListener('click', () => {
 })
 
 document.querySelector('#reset-view').addEventListener('click', () => {
+  modelTransition.finish()
   entrance.finish()
   camera.position.set(5.2, 1.1, 8.5)
   controls.target.set(0, -0.25, 0)
@@ -664,6 +698,7 @@ function layoutImmersiveView() {
 
 function enterImmersiveView() {
   if (document.body.classList.contains('is-immersive')) return
+  modelTransition.finish()
 
   savedView = {
     position: camera.position.clone(),
@@ -690,7 +725,7 @@ function enterImmersiveView() {
 }
 
 function frameLampForImmersive() {
-  return entrance.withRestPose(fitLampForImmersive)
+  return modelTransition.withRestPose(() => entrance.withRestPose(fitLampForImmersive))
 }
 
 function fitLampForImmersive() {
@@ -727,7 +762,7 @@ function fitLampForImmersive() {
 }
 
 function frameLampForNormal() {
-  return entrance.withRestPose(fitLampForNormal)
+  return modelTransition.withRestPose(() => entrance.withRestPose(fitLampForNormal))
 }
 
 function fitLampForNormal() {
@@ -773,6 +808,7 @@ function fitLampForNormal() {
 
 function exitImmersiveView() {
   if (!document.body.classList.contains('is-immersive')) return
+  modelTransition.finish()
 
   closeImmersivePopup(false)
   document.body.classList.remove('is-immersive')
@@ -823,6 +859,7 @@ let canvasHeight = 0
 function resize(preserveView = false) {
   const { width, height } = canvasWrap.getBoundingClientRect()
   if (!width || !height || (width === canvasWidth && height === canvasHeight)) return
+  modelTransition.finish()
   canvasWidth = width
   canvasHeight = height
   renderer.setSize(width, height, false)
@@ -848,7 +885,8 @@ function animate(time = performance.now()) {
   previousFrameTime = time
   // Keep the surface still in Draw mode; resume automatically in Rotate mode.
   entrance.update(time)
-  controls.autoRotate = controls.enabled && !entrance.active && !motionPreference.matches
+  modelTransition.update(time)
+  controls.autoRotate = controls.enabled && !entrance.active && !modelTransition.active && !motionPreference.matches
   if (controls.enabled) controls.update(delta)
   renderer.render(scene, camera)
 }

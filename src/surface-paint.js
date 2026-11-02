@@ -362,9 +362,9 @@ export class SurfacePaint {
     this.finishStroke()
   }
 
-  reset() {
+  reset({ disposeTextures = true } = {}) {
     this.finishStroke()
-    this.records.forEach(record => record.texture?.dispose())
+    if (disposeTextures) this.records.forEach(record => record.texture?.dispose())
     this.records.clear()
     this.undoStack = []
     this.redoStack = []
