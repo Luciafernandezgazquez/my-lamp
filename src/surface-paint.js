@@ -122,18 +122,23 @@ export class SurfacePaint {
     this.setMode(this.settings.mode)
   }
 
+  setInteractionLocked(locked) {
+    this.interactionLocked = locked
+    this.setMode(this.settings.mode)
+  }
+
   setMode(mode) {
     this.finishStroke()
     this.settings.mode = mode
     // Settle any remaining OrbitControls damping before locking the camera.
-    if (this.open && mode === 'draw') {
+    if (this.interactionLocked || (this.open && mode === 'draw')) {
       const damping = this.controls.enableDamping
       this.controls.enableDamping = false
       this.controls.update()
       this.controls.enableDamping = damping
     }
-    this.controls.enabled = !(this.open && mode === 'draw')
-    this.canvas.classList.toggle('is-drawing', !this.controls.enabled)
+    this.controls.enabled = !this.interactionLocked && !(this.open && mode === 'draw')
+    this.canvas.classList.toggle('is-drawing', !this.interactionLocked && this.open && mode === 'draw')
     this.cursor.hidden = true
   }
 
@@ -147,6 +152,7 @@ export class SurfacePaint {
   }
 
   pointerEvent(event) {
+    if (this.interactionLocked) return
     if (!this.open || this.settings.mode !== 'draw') return
     event.preventDefault()
     event.stopImmediatePropagation()

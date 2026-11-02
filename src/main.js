@@ -7,12 +7,13 @@ import { palettes, mixedShades } from './palettes.js'
 import { lightTemperature } from './light-temperature.js'
 import { createCeramicEnvironment, createCeramicMaterial } from './ceramic-material.js'
 import { createPatternStudio } from './pattern-studio.js'
+import { createEntranceAnimation } from './entrance-animation.js'
 
 const models = [
-  { id: 'dome', name: 'Dome', price: 320 },
-  { id: 'orbit', name: 'Orbit', price: 365 },
-  { id: 'tier', name: 'Tier', price: 410 },
-  { id: 'glass', name: 'Glass', price: 490 },
+  { id: 'dome', name: 'BOP', price: 320 },
+  { id: 'orbit', name: 'TUT', price: 365 },
+  { id: 'tier', name: 'ZIG', price: 410 },
+  { id: 'glass', name: 'PIP', price: 490 },
 ]
 
 const materials = [
@@ -67,7 +68,7 @@ document.querySelector('#app').innerHTML = `
         <a class="logo studio-home" href="#" aria-label="Return to Stap configurator"><span>sta</span><span>p</span></a>
         <div class="viewer-copy">
           <p class="eyebrow">Your light, your mood</p>
-          <h2 id="lamp-title">Dome <span>01</span></h2>
+          <h2 id="lamp-title">BOP <span>01</span></h2>
         </div>
         <div class="scene-backdrop" aria-hidden="true"><span></span><span></span></div>
         <div class="canvas-wrap" id="canvas-wrap"></div>
@@ -178,9 +179,10 @@ const scene = new THREE.Scene()
 const camera = new THREE.PerspectiveCamera(32, canvasWrap.clientWidth / canvasWrap.clientHeight, 0.1, 100)
 camera.position.set(5.2, 1.1, 8.5)
 
+const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)')
 const controls = new OrbitControls(camera, renderer.domElement)
 controls.enableDamping = true
-controls.autoRotate = true
+controls.autoRotate = !motionPreference.matches
 controls.autoRotateSpeed = 1.5 // One full revolution every 40 seconds.
 controls.enablePan = false
 controls.minDistance = 6
@@ -218,12 +220,26 @@ floor.visible = false
 scene.add(floor)
 
 const lampRoot = new THREE.Group()
+lampRoot.rotation.y = -0.32
 scene.add(lampRoot)
 let lampLight
 let lampBulb
-let revealScale = 1
+let lightReveal = 1
 let normalStudioOpen = false
 const studio = createPatternStudio({ canvas: renderer.domElement, camera, controls, root: lampRoot, onClose: closePatternStudio })
+const entrance = createEntranceAnimation({
+  root: lampRoot,
+  canvas: renderer.domElement,
+  motionPreference,
+  onLight(amount) {
+    lightReveal = amount
+    applyLampIntensity()
+  },
+  onLock(locked) {
+    controls.autoRotate = !locked && !motionPreference.matches && !(studio.paint.open && studio.paint.settings.mode === 'draw')
+    studio.paint.setInteractionLocked(locked)
+  },
+})
 
 function finishMaterial(color, materialId) {
   const base = new THREE.Color(color)
@@ -375,6 +391,7 @@ function disposeLamp() {
 }
 
 function buildLamp({ reframe = true } = {}) {
+  entrance.finish()
   disposeLamp()
   lampLight = null
   lampBulb = null
@@ -387,10 +404,14 @@ function buildLamp({ reframe = true } = {}) {
   builders[state.model.id](...finishes)
   studio.paint.bind()
 
-  lampRoot.rotation.y = -0.32
-  revealScale = 0.84
   updateLight()
   if (reframe) requestAnimationFrame(() => document.body.classList.contains('is-immersive') ? frameLampForImmersive() : frameLampForNormal())
+}
+
+function applyLampIntensity() {
+  const amount = state.lightOn ? lightReveal : 0
+  if (lampLight) lampLight.intensity = 7 * amount
+  if (lampBulb) lampBulb.material.emissiveIntensity = 2.2 * amount
 }
 
 function updateLight() {
@@ -406,14 +427,13 @@ function updateLight() {
   // Studio illumination stays fixed; only the lamp's own light changes.
   if (lampLight) {
     lampLight.color.copy(color)
-    lampLight.intensity = state.lightOn ? 7 : 0
   }
   // Only the dedicated bulb emits light. Painted parts retain their complete
   // finish, including base color and emissive settings, at every temperature.
   if (lampBulb) {
     lampBulb.material.emissive.copy(color)
-    lampBulb.material.emissiveIntensity = state.lightOn ? 2.2 : 0
   }
+  applyLampIntensity()
   document.querySelector('#light-toggle').classList.toggle('is-on', state.lightOn)
   document.querySelector('#light-toggle').setAttribute('aria-pressed', state.lightOn)
   document.querySelector('#light-label').textContent = state.lightOn ? 'Light on' : 'Light off'
@@ -506,6 +526,7 @@ document.querySelector('#light-toggle').addEventListener('click', () => {
 })
 
 document.querySelector('#reset-view').addEventListener('click', () => {
+  entrance.finish()
   camera.position.set(5.2, 1.1, 8.5)
   controls.target.set(0, -0.25, 0)
   controls.update()
@@ -669,6 +690,10 @@ function enterImmersiveView() {
 }
 
 function frameLampForImmersive() {
+  return entrance.withRestPose(fitLampForImmersive)
+}
+
+function fitLampForImmersive() {
   if (!document.body.classList.contains('is-immersive')) return
   // Fit the final size, rather than the temporary model-reveal animation scale.
   const bounds = new THREE.Box3().setFromObject(lampRoot)
@@ -702,6 +727,10 @@ function frameLampForImmersive() {
 }
 
 function frameLampForNormal() {
+  return entrance.withRestPose(fitLampForNormal)
+}
+
+function fitLampForNormal() {
   if (document.body.classList.contains('is-immersive') || !lampRoot.children.length) return
   lampRoot.updateMatrixWorld(true)
   // In the reference, the suspension cord continues to the circle's upper
@@ -818,13 +847,14 @@ function animate(time = performance.now()) {
   const delta = previousFrameTime === undefined ? 0 : Math.min((time - previousFrameTime) / 1000, 0.1)
   previousFrameTime = time
   // Keep the surface still in Draw mode; resume automatically in Rotate mode.
-  controls.autoRotate = controls.enabled
+  entrance.update(time)
+  controls.autoRotate = controls.enabled && !entrance.active && !motionPreference.matches
   if (controls.enabled) controls.update(delta)
-  revealScale += (1 - revealScale) * 0.08
-  lampRoot.scale.setScalar(revealScale)
   renderer.render(scene, camera)
 }
 
 buildLamp()
 updateSummary()
+resize()
+entrance.start()
 animate()

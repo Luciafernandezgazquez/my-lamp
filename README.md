@@ -8,7 +8,7 @@ The application runs entirely in the browser. It is a product configurator proto
 
 The regular configurator follows [LAYOUT_2.jpg](public/assets/LAYOUT_2.jpg), designed at **1440 × 1024**: a circular cream viewer, numbered outline pills, circular choices, a centered headline, and the eye-shaped immersive button. Model, Color, and Material sit on the left; Light Temperature, Studio, and Background sit on the right. On smaller screens the viewer moves above a two-column control layout.
 
-The headline reads “Make light your own.” Three material finishes are available: Ceramic, Crystal, and Matte. The initial Dome / Yellow / Ceramic configuration is unchanged; the reference illustrates a different Glass configuration. The live models, palettes, lighting, and surface finishes retain their existing behavior.
+The headline reads “Make light your own.” Three material finishes are available: Ceramic, Crystal, and Matte. The initial BOP / Yellow / Ceramic configuration is unchanged; the reference illustrates a different PIP configuration. The live models, palettes, lighting, and surface finishes retain their existing behavior.
 
 The regular view uses the reference's color-family swatches; immersive Color options display the four actual shades in each palette. Mixed updates its preview after each click. Selection dots identify active model, color, and material choices without changing the reference's button shapes.
 
@@ -48,6 +48,7 @@ Run these commands from the project root:
 | `npm ci` | Install the dependency versions recorded in `package-lock.json`. |
 | `npm run dev` | Start the development server with live updates. |
 | `npm run build` | Generate the production website in `dist/`. |
+| `npm test` | Check entrance timing, exact pose restoration, assembly, and reduced-motion behavior. |
 | `npm run preview` | Serve an existing production build locally, normally on port 4173. |
 | `npm run dev -- --host 0.0.0.0` | Make the development server reachable from another device on the same network. |
 
@@ -55,16 +56,29 @@ For phone testing, use your computer's local network address and the port printe
 
 ## Using the configurator
 
-1. Select a **Model**: Dome, Orbit, Tier, or Glass.
+1. Select a **Model**: BOP, TUT, ZIG, or PIP.
 2. Select a **Color** palette: Pink, Yellow, Blue, White, Black, or Mixed colors.
 3. Choose a **Material**: Ceramic, Crystal, or Matte.
 4. Switch the lamp on and adjust **Light temperature** from warm through neutral to cool white.
 5. Drag the lamp to rotate it. Use the mouse wheel or a touch pinch to zoom. The desktop viewer also provides **Reset view**.
 6. Open **Pattern Studio** to decorate the lamp with watercolor, lines, or polka dots.
 
-The initial configuration is **Dome / Yellow / Ceramic**, with the light on and the temperature slider at **32**, displayed as approximately **3550K**. Its displayed price is **€355**.
+The initial configuration is **BOP / Yellow / Ceramic**, with the light on and the temperature slider at **32**, displayed as approximately **3550K**. Its displayed price is **€355**.
 
 Selections survive entry to and exit from immersive view. They are held in memory for the current page session; reloading restores the defaults.
+
+### Entrance animation
+
+On first load, the lamp fades in, grows gently to its normal size, and rotates into position. The collar, shade, trim, and bulb assemble with staggered vertical motion, followed by a soft light transition. The complete reveal lasts **3.6 seconds**:
+
+- **0–0.85 seconds:** fade in.
+- **0–1.7 seconds:** scale and rotation settle.
+- **0.95–2.65 seconds:** components assemble into their exact original positions.
+- **2.65–3.6 seconds:** the bulb and lamp light gradually illuminate at the selected temperature.
+
+Rotation, zoom, and painting are locked during the reveal. The configuration controls remain available: colors and temperature apply immediately; choosing a model or material, or using Reset view, completes the entrance immediately without replaying it. Opening Pattern Studio during the entrance preserves its selected Draw/Rotate mode when the reveal ends. View changes and resizes continue to fit the final assembled lamp.
+
+With `prefers-reduced-motion: reduce`, the lamp appears immediately in its finished state and automatic rotation is disabled; manual rotation and customization remain available. Enabling reduced motion during the reveal immediately completes it. The animation uses the existing render loop and adds no runtime dependencies.
 
 ### Immersive view
 
@@ -122,7 +136,7 @@ These hex values describe the base material colors. Lighting, reflections, and t
 
 Ceramic uses object-space surface detail to avoid UV seams and keep the grain attached to the lamp during rotation. Scaled geometry keeps the grain consistent across differently shaped parts; subpixel detail fades at a distance to reduce shimmer. A shared, neutral studio environment supplies broad reflections. The reference photographs guide the finish and are not applied as color textures.
 
-The Glass model uses the ceramic finish when Ceramic is selected. Its other finish choices retain the model's glass treatment. With Crystal selected, accent parts use a glossy finish for definition.
+The PIP model uses the ceramic finish when Ceramic is selected. Its other finish choices retain the model's glass treatment. With Crystal selected, accent parts use a glossy finish for definition.
 
 ### Lighting
 
@@ -138,10 +152,10 @@ The displayed total is the model price plus the finish surcharge, defined in [sr
 
 | Model | Base price |
 | --- | --- |
-| Dome | €320 |
-| Orbit | €365 |
-| Tier | €410 |
-| Glass | €490 |
+| BOP | €320 |
+| TUT | €365 |
+| ZIG | €410 |
+| PIP | €490 |
 
 | Finish | Surcharge |
 | --- | --- |
@@ -165,6 +179,7 @@ my-product/
 │   └── assets/                Design and ceramic reference images
 ├── src/
 │   ├── main.js                UI, shared state, lamp geometry, scene, and interactions
+│   ├── entrance-animation.js  Load-only reveal, assembly offsets, and light timing
 │   ├── style.css              Layout, typography, controls, and responsive styles
 │   ├── layout.css             LAYOUT_2 presentation, circular viewer, and responsive placement
 │   ├── palettes.js            Color families and Mixed color generation
@@ -207,7 +222,7 @@ The current interface uses **Arial** to match the supplied layout's letterforms 
 | Default selections | The `state` object in `src/main.js`. |
 | Models and prices | The `models` array, model builders, and model icons in `src/main.js`; icon styles in `src/style.css`. |
 | Palettes and Mixed behavior | `src/palettes.js`. Keep four shades per palette to preserve part assignments. |
-| Material finishes | `finishMaterial()` and the Glass model treatment in `src/main.js`. |
+| Material finishes | `finishMaterial()` and the PIP model treatment in `src/main.js`. |
 | Ceramic grain, glaze, and reflections | `src/ceramic-material.js`. |
 | Drawing brushes, projection, and history | `src/surface-paint.js`; controls in `src/pattern-studio.js` and `src/pattern-studio.css`. |
 | Light temperature and displayed Kelvin values | `src/light-temperature.js`; keep the slider gradients in `src/style.css` consistent with its endpoint colors. |
@@ -240,7 +255,9 @@ Files under `public/`, including the moodboard references, are copied into the b
 
 ## Verification and troubleshooting
 
-There are currently no automated test or lint scripts configured in `package.json`. After a functional or visual change, run `npm run build` and check the following in a browser:
+Run `npm test` for entrance lifecycle and restoration checks, and `npm run build` for the production build. No lint script is configured. After a functional or visual change, also check the following in a browser:
+
+- The entrance runs once in approximately 3.6 seconds, restores the exact assembled pose, and releases rotation/painting. Check reduced motion, resizing during the reveal, and changing selections before it completes.
 
 - All four models and all finishes render without browser-console or WebGL errors.
 - Each palette colors the correct parts; repeated Mixed clicks produce new combinations and matching swatches.
