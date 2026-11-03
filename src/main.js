@@ -665,8 +665,8 @@ document.querySelectorAll('.logo').forEach((logo) => {
 })
 
 document.querySelector('#open-pattern-studio').addEventListener('click', () => {
-  // On narrow screens, keep the lamp and drawing tools together in the viewport.
-  if (window.matchMedia('(max-width: 1100px)').matches) {
+  // Match the stacked layout breakpoint: keep the lamp and tools together.
+  if (window.matchMedia('(max-width: 1200px)').matches) {
     enterImmersiveView()
     toggleImmersivePopup('pattern')
     return
@@ -871,7 +871,7 @@ function resize(preserveView = false) {
 
 window.addEventListener('resize', () => {
   if (normalStudioOpen && !document.body.classList.contains('is-immersive') &&
-      window.matchMedia('(max-width: 1100px)').matches) enterImmersiveView()
+      window.matchMedia('(max-width: 1200px)').matches) enterImmersiveView()
   if (document.body.classList.contains('is-immersive')) layoutImmersiveView()
   else resize()
 })
