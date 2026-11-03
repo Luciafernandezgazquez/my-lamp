@@ -1,0 +1,76 @@
+/* Loaded directly by the HTML, before the scene's JavaScript and styles. */
+html.is-loading,
+html.is-loading body { overflow: hidden; }
+html.is-loading #app { pointer-events: none; }
+html.is-loading #app canvas { visibility: hidden; }
+#loading-screen {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: grid;
+  place-content: center;
+  background: #fff;
+  color: #080808;
+  font: 16px/1.4 Arial, sans-serif;
+  text-align: center;
+  touch-action: none;
+  overscroll-behavior: none;
+}
+.loading-disc {
+  position: absolute;
+  inset: 0;
+  background: #F3E082;
+  /* 75vmax covers the diagonal, even in a square viewport or after resize. */
+  clip-path: circle(75vmax at 50% 50%);
+  animation: loading-expand 680ms cubic-bezier(.65, 0, .35, 1) 160ms both;
+}
+#loading-screen.is-revealing { background: transparent; }
+#loading-screen.is-revealing .loading-disc {
+  animation: loading-contract 1150ms cubic-bezier(.16, 1, .3, 1) both;
+}
+.loading-message {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+#loading-screen.has-error .loading-disc { display: none; }
+#loading-screen.has-error { background: #fff; padding: 24px; }
+#loading-screen.has-error .loading-message {
+  position: static;
+  width: auto;
+  height: auto;
+  max-width: 28rem;
+  margin: 0 0 20px;
+  clip-path: none;
+  white-space: normal;
+}
+#loading-retry {
+  justify-self: center;
+  padding: 10px 24px;
+  border: 1px solid currentColor;
+  border-radius: 100px;
+  background: white;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.loading-no-script { position: relative; margin: 24px; background: white; padding: 12px; }
+@keyframes loading-expand {
+  from { clip-path: circle(16px at 50% 50%); }
+  to { clip-path: circle(75vmax at 50% 50%); }
+}
+@keyframes loading-contract {
+  from { clip-path: circle(75vmax at 50% 50%); }
+  to { clip-path: circle(0 at 50% 50%); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .loading-disc,
+  #loading-screen.is-revealing .loading-disc {
+    animation: none;
+    clip-path: circle(16px at 50% 50%);
+  }
+}

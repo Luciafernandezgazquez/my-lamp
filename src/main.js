@@ -894,5 +894,28 @@ function animate(time = performance.now()) {
 buildLamp()
 updateSummary()
 resize()
-entrance.start()
-animate()
+setLampInteractionLocked(true)
+
+// Models, the ceramic reflection map, and the blank paint texture are generated
+// locally. Compile their actual shaders and render once to upload their buffers
+// and textures before declaring the scene ready. No loading-duration estimate.
+export const sceneReady = (async () => {
+  const materialPreview = new Image()
+  materialPreview.src = `${import.meta.env.BASE_URL}assets/LAYOUT_2.jpg`
+  await Promise.all([
+    renderer.compileAsync(scene, camera),
+    document.fonts.ready,
+    materialPreview.decode(),
+  ])
+  renderer.render(scene, camera)
+  await new Promise(resolve => requestAnimationFrame(resolve))
+})()
+
+let configuratorStarted = false
+export function startConfigurator() {
+  if (configuratorStarted) return
+  configuratorStarted = true
+  setLampInteractionLocked(false)
+  entrance.start()
+  animate()
+}
