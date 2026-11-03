@@ -18,16 +18,18 @@ const models = [
 ]
 
 const materials = [
-  { id: 'ceramic', name: 'Ceramic', price: 35 },
-  { id: 'crystal', name: 'Crystal', price: 90 },
-  { id: 'matte', name: 'Matte', price: 0 },
+  // Reference order: MATERIAL_1 (Matte), MATERIAL_2 (Crystal), MATERIAL_3 (Ceramic).
+  // Preview sizing compensates for transparent padding without editing the PNGs.
+  { id: 'matte', name: 'Matte', price: 0, preview: 'material-matte.png', previewSize: '109.4%', previewY: '50%' },
+  { id: 'crystal', name: 'Crystal', price: 90, preview: 'material-crystal.png', previewSize: '153%', previewY: '54.3%' },
+  { id: 'ceramic', name: 'Ceramic', price: 35, preview: 'material-ceramic.png', previewSize: '112.25%', previewY: '50%' },
 ]
 
 const state = {
   model: models[0],
   palette: 'yellow',
   shades: [...palettes[1].shades],
-  material: materials[0],
+  material: materials.find(material => material.id === 'ceramic'),
   temperature: 32,
   lightOn: true,
   background: 'cream',
@@ -125,9 +127,9 @@ document.querySelector('#app').innerHTML = `
         <section class="control-section material-control">
             <div class="section-title"><span>03.</span><h3>Material</h3></div>
             <div class="material-grid" role="radiogroup" aria-label="Lamp material">
-              ${materials.map((material, index) => `
-                <button class="material-option${index === 0 ? ' is-selected' : ''}" type="button" role="radio" aria-label="${material.name}" title="${material.name}" aria-checked="${index === 0}" data-material="${material.id}">
-                  <i class="material-sample material-sample--${material.id}"></i>
+              ${materials.map(material => `
+                <button class="material-option${material.id === state.material.id ? ' is-selected' : ''}" type="button" role="radio" aria-label="${material.name}" title="${material.name}" aria-checked="${material.id === state.material.id}" data-material="${material.id}">
+                  <i class="material-sample" aria-hidden="true" style="--material-preview: url('${import.meta.env.BASE_URL}assets/${material.preview}'); --material-preview-size: ${material.previewSize}; --material-preview-y: ${material.previewY}"></i>
                   <span>${material.name}</span>
                 </button>
               `).join('')}
@@ -900,12 +902,15 @@ setLampInteractionLocked(true)
 // locally. Compile their actual shaders and render once to upload their buffers
 // and textures before declaring the scene ready. No loading-duration estimate.
 export const sceneReady = (async () => {
-  const materialPreview = new Image()
-  materialPreview.src = `${import.meta.env.BASE_URL}assets/LAYOUT_2.jpg`
+  const materialPreviews = materials.map(material => {
+    const preview = new Image()
+    preview.src = `${import.meta.env.BASE_URL}assets/${material.preview}`
+    return preview.decode()
+  })
   await Promise.all([
     renderer.compileAsync(scene, camera),
     document.fonts.ready,
-    materialPreview.decode(),
+    ...materialPreviews,
   ])
   renderer.render(scene, camera)
   await new Promise(resolve => requestAnimationFrame(resolve))
