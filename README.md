@@ -8,6 +8,8 @@ The application runs entirely in the browser. It is a product configurator proto
 
 The regular configurator follows [LAYOUT_2.jpg](public/assets/LAYOUT_2.jpg), designed at **1440 × 1024**: a circular viewer, numbered outline pills, circular choices, a centered headline, and the eye-shaped immersive button. The viewer now uses a plain soft off-white background with a subtle 1px neutral outline, replacing the colored gradients. Model, Color, and Material sit on the left; Light Temperature, Studio, and Background sit on the right. On smaller screens the viewer moves above a two-column control layout.
 
+At **640px and below**, the mobile layout follows the supplied “Android Compact - 1” Figma reference: compact header, centered headline, circular viewer, separator, then Model / Color / Material opposite Light Temperature / Studio / Background. The page scrolls vertically, swatches have larger tap areas than their visible circles, and the temperature slider remains directly accessible. These presentation changes live in `src/layout.css`; the existing scene, camera logic, animations, and shared controls are reused. See the [mobile previews and verification notes](artifacts/mobile-layout/README.md).
+
 The headline reads “Make light your own.” Three material finishes are available: Ceramic, Crystal, and Matte. The initial BOP / Yellow / Ceramic configuration is unchanged; the reference illustrates a different PIP configuration. The live models, palettes, lighting, and surface finishes retain their existing behavior.
 
 The regular view uses the reference's color-family swatches; immersive Color options display the four actual shades in each palette. Mixed updates its preview after each click. Selection dots identify active model, color, and material choices without changing the reference's button shapes.
@@ -15,7 +17,7 @@ The regular view uses the reference's color-family swatches; immersive Color opt
 - Click the **04.** badge to turn the lamp on/off. Its tooltip and accessible label describe the current action; the temperature slider dims when off.
 - **start now** opens Pattern Studio.
 - **Background** changes only the viewer's flat backdrop color. Click the selected swatch again to return to off-white. The chosen background survives view changes; immersive view also uses a plain fill.
-- Hover or focus the desktop viewer to reveal **Reset view**, rotation guidance, and the current price below the circle. These remain visible on smaller screens.
+- Hover or focus the desktop viewer to reveal **Reset view**, rotation guidance, and the current price below the circle. On phones, **Reset view** stays visible inside the circle; guidance and price are hidden to match the compact reference.
 - The normal camera fits the complete lamp body, with its suspension cord continuing to the circle's top edge as in the reference. Immersive view fits the entire model, including the cord.
 
 Git checkpoint **`90f270a`** preserves the working configurator and supplied reference before this redesign.
