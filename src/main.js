@@ -894,12 +894,14 @@ function animate(time = performance.now()) {
 buildLamp()
 updateSummary()
 resize()
-setLampInteractionLocked(true)
+// Set the entrance's initial pose before the preparation render, avoiding a
+// flash of the fully assembled lamp while its resources become ready.
+entrance.start()
 
 // Models, the ceramic reflection map, and the blank paint texture are generated
 // locally. Compile their actual shaders and render once to upload their buffers
 // and textures before declaring the scene ready. No loading-duration estimate.
-export const sceneReady = (async () => {
+const sceneReady = (async () => {
   const materialPreview = new Image()
   materialPreview.src = `${import.meta.env.BASE_URL}assets/LAYOUT_2.jpg`
   await Promise.all([
@@ -911,11 +913,6 @@ export const sceneReady = (async () => {
   await new Promise(resolve => requestAnimationFrame(resolve))
 })()
 
-let configuratorStarted = false
-export function startConfigurator() {
-  if (configuratorStarted) return
-  configuratorStarted = true
-  setLampInteractionLocked(false)
-  entrance.start()
-  animate()
-}
+sceneReady
+  .catch(error => console.error('Unable to prepare the STAP configurator:', error))
+  .then(() => animate())

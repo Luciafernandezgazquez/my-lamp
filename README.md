@@ -52,7 +52,7 @@ Run these commands from the project root:
 | `npm ci` | Install the dependency versions recorded in `package-lock.json`. |
 | `npm run dev` | Start the development server with live updates. |
 | `npm run build` | Generate the production website in `dist/`. |
-| `npm test` | Check loading-screen handoff, entrance and model-transition timing, pose restoration, rapid selections, and reduced motion. |
+| `npm test` | Check entrance and model-transition timing, pose restoration, rapid selections, and reduced motion. |
 | `npm run preview` | Serve an existing production build locally, normally on port 4173. |
 | `npm run dev -- --host 0.0.0.0` | Make the development server reachable from another device on the same network. |
 
@@ -71,17 +71,11 @@ The initial configuration is **BOP / Yellow / Ceramic**, with the light on and t
 
 Selections survive entry to and exit from immersive view. They are held in memory for the current page session; reloading restores the defaults.
 
-### Loading screen
-
-Each fresh visit or refresh starts with a centered 32px **#F3E082** circle on white. After a 160ms pause, it expands over 680ms to cover the viewport. It holds there until the initial scene is ready, then contracts over 1.15 seconds with a strong ease-out, inspired by the supplied screen recording. The recording starts with a filled panel contracting; the preceding expansion follows the requested small-to-full sequence.
-
-The loading overlay is included in `index.html`, with its own small stylesheet, so it can appear before the main JavaScript bundle loads. `bootstrap.js` waits for `sceneReady`: generated lamp geometry and environment textures, shader compilation, font readiness, the decoded material-preview image, and an initial rendered frame. Fast loads still complete both circle phases; slow loads extend the full-yellow hold. Preparation failures show a retry button.
-
-The configurator is inert to pointer and keyboard input during loading. Once contraction finishes, the existing lamp entrance starts at its first frame, the overlay is removed, and controls become available under the entrance animation's existing interaction rules. Changing a model, finish, palette, or view never replays the loader. With reduced motion, a static dot remains until readiness, then the configurator appears without the circle animation or lamp entrance. No new dependencies were added. See the [loading-screen review](artifacts/loading-screen/README.md).
-
 ### Entrance animation
 
-After the loading screen, the lamp fades in, grows gently to its normal size, and rotates into position. The collar, shade, trim, and bulb assemble with staggered vertical motion, followed by a soft light transition. The complete lamp reveal lasts **3.6 seconds**:
+The configurator opens directly. Shader compilation, generated textures, font readiness, the decoded material-preview image, and an initial render are prepared before the animation clock starts. There is no loading overlay or minimum waiting period.
+
+On first load, the lamp fades in, grows gently to its normal size, and rotates into position. The collar, shade, trim, and bulb assemble with staggered vertical motion, followed by a soft light transition. The complete reveal lasts **3.6 seconds**:
 
 - **0–0.85 seconds:** fade in.
 - **0–1.7 seconds:** scale and rotation settle.
@@ -198,9 +192,6 @@ my-product/
 ├── public/
 │   └── assets/                Design and ceramic reference images
 ├── src/
-│   ├── bootstrap.js           Scene readiness and loading-screen handoff
-│   ├── loading-screen.js      Overlay lifecycle, interaction lock, and retry
-│   ├── loading-screen.css     Early-loading circle motion and reduced motion
 │   ├── main.js                UI, shared state, lamp geometry, scene, and interactions
 │   ├── entrance-animation.js  Load-only reveal, assembly offsets, and light timing
 │   ├── model-transition.js    Model carousel, camera blending, and latest-selection queue

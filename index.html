@@ -1,21 +1,14 @@
 <!doctype html>
-<html lang="en" class="is-loading">
+<html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#ffffff" />
     <meta name="description" content="Configure a sculptural Stap lamp in 3D." />
     <title>Stap — Light with character</title>
-    <link rel="stylesheet" href="/src/loading-screen.css" />
   </head>
   <body>
-    <div id="loading-screen" role="status" aria-live="polite" aria-atomic="true">
-      <div class="loading-disc" aria-hidden="true"></div>
-      <p class="loading-message">Preparing your light…</p>
-      <button id="loading-retry" type="button" hidden>Try again</button>
-      <noscript><p class="loading-no-script">Please enable JavaScript to use the STAP configurator.</p></noscript>
-    </div>
-    <div id="app" inert aria-busy="true"></div>
-    <script type="module" src="/src/bootstrap.js"></script>
+    <div id="app"></div>
+    <script type="module" src="/src/main.js"></script>
   </body>
 </html>
