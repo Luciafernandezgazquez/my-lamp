@@ -52,7 +52,7 @@ Run these commands from the project root:
 | `npm ci` | Install the dependency versions recorded in `package-lock.json`. |
 | `npm run dev` | Start the development server with live updates. |
 | `npm run build` | Generate the production website in `dist/`. |
-| `npm test` | Check entrance and model-transition timing, pose restoration, rapid selections, and reduced motion. |
+| `npm test` | Check bubble-loader handoff, entrance and model-transition timing, pose restoration, rapid selections, and reduced motion. |
 | `npm run preview` | Serve an existing production build locally, normally on port 4173. |
 | `npm run dev -- --host 0.0.0.0` | Make the development server reachable from another device on the same network. |
 
@@ -71,11 +71,17 @@ The initial configuration is **BOP / Yellow / Ceramic**, with the light on and t
 
 Selections survive entry to and exit from immersive view. They are held in memory for the current page session; reloading restores the defaults.
 
+### Bubble loading sequence
+
+Each fresh visit or refresh opens on white with six small **#F3E082** bubbles appearing in a staggered sequence. They drift apart, grow from their separate positions, and overlap to fill the entire viewport in approximately **2.09 seconds**. The screen then holds in solid yellow until the scene is ready and reveals the configurator in **180ms**, followed by the existing lamp entrance. There is no visible loading text, logo, or other graphic element.
+
+The overlay starts from `index.html` before the scene bundle loads. `startup.js` waits for the existing `sceneReady` preparation: shaders, generated textures, font readiness, the decoded material-preview image, and an initial render. Fast loads still complete the bubble sequence; slow loads extend the full-yellow hold. Pointer, touch, and keyboard access to the configurator are blocked until the reveal finishes. Model, color, material, or view changes do not replay it.
+
+Reduced motion shows three static bubbles until readiness and opens the finished lamp without the animated fill or entrance. Enabling reduced motion mid-sequence cancels the motion and does not restart it if preferences change again. A failed main-module download leaves a bubble-only surface that can be clicked or activated with Enter/Space to retry; its accessible label explains the action. No new dependencies were added. See the [bubble-loader previews and verification](artifacts/bubble-loader/README.md).
+
 ### Entrance animation
 
-The configurator opens directly. Shader compilation, generated textures, font readiness, the decoded material-preview image, and an initial render are prepared before the animation clock starts. There is no loading overlay or minimum waiting period.
-
-On first load, the lamp fades in, grows gently to its normal size, and rotates into position. The collar, shade, trim, and bulb assemble with staggered vertical motion, followed by a soft light transition. The complete reveal lasts **3.6 seconds**:
+After the bubble reveal, the lamp fades in, grows gently to its normal size, and rotates into position. The collar, shade, trim, and bulb assemble with staggered vertical motion, followed by a soft light transition. The complete lamp reveal lasts **3.6 seconds**:
 
 - **0–0.85 seconds:** fade in.
 - **0–1.7 seconds:** scale and rotation settle.
@@ -192,6 +198,9 @@ my-product/
 ├── public/
 │   └── assets/                Design and ceramic reference images
 ├── src/
+│   ├── startup.js             Scene readiness and bubble-loader handoff
+│   ├── bubble-loader.js       Overlay lifecycle, interaction lock, and recovery
+│   ├── bubble-loader.css      Bubble motion, yellow fill, and reduced motion
 │   ├── main.js                UI, shared state, lamp geometry, scene, and interactions
 │   ├── entrance-animation.js  Load-only reveal, assembly offsets, and light timing
 │   ├── model-transition.js    Model carousel, camera blending, and latest-selection queue

@@ -1,14 +1,23 @@
 <!doctype html>
-<html lang="en">
+<html lang="en" class="is-preparing">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#ffffff" />
     <meta name="description" content="Configure a sculptural Stap lamp in 3D." />
     <title>Stap — Light with character</title>
+    <link rel="stylesheet" href="/src/bubble-loader.css" />
   </head>
   <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
+    <div id="bubble-loader" role="status" aria-label="Loading configurator" aria-live="polite">
+      <i class="loading-bubble" aria-hidden="true"></i>
+      <i class="loading-bubble" aria-hidden="true"></i>
+      <i class="loading-bubble" aria-hidden="true"></i>
+      <i class="loading-bubble" aria-hidden="true"></i>
+      <i class="loading-bubble" aria-hidden="true"></i>
+      <i class="loading-bubble" aria-hidden="true"></i>
+    </div>
+    <div id="app" inert aria-busy="true"></div>
+    <script type="module" src="/src/startup.js"></script>
   </body>
 </html>

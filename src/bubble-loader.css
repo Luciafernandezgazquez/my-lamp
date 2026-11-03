@@ -1,0 +1,54 @@
+/* Loaded before the scene bundle: only flat yellow circles on white. */
+html.is-preparing,
+html.is-preparing body { overflow: hidden; }
+html.is-preparing #app { pointer-events: none; }
+html.is-preparing #app canvas { visibility: hidden; }
+#bubble-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  overflow: hidden;
+  background: #fff;
+  touch-action: none;
+  overscroll-behavior: none;
+}
+.loading-bubble {
+  position: absolute;
+  inset: 0;
+  background: #F3E082;
+  clip-path: circle(0 at var(--x) var(--y));
+  animation: bubble-fill 1650ms cubic-bezier(.45, 0, .2, 1) var(--delay) both;
+}
+.loading-bubble:nth-child(1) { --x: 46%; --y: 56%; --drift-x: 32%; --drift-y: 30%; --radius: 15px; --delay: 0ms; }
+.loading-bubble:nth-child(2) { --x: 54%; --y: 52%; --drift-x: 72%; --drift-y: 38%; --radius: 11px; --delay: 80ms; }
+.loading-bubble:nth-child(3) { --x: 50%; --y: 46%; --drift-x: 49%; --drift-y: 18%; --radius: 9px; --delay: 160ms; }
+.loading-bubble:nth-child(4) { --x: 42%; --y: 54%; --drift-x: 19%; --drift-y: 65%; --radius: 12px; --delay: 280ms; }
+.loading-bubble:nth-child(5) { --x: 57%; --y: 58%; --drift-x: 78%; --drift-y: 72%; --radius: 10px; --delay: 360ms; }
+.loading-bubble:nth-child(6) { --x: 49%; --y: 60%; --drift-x: 47%; --drift-y: 82%; --radius: 8px; --delay: 440ms; }
+@keyframes bubble-fill {
+  0% { clip-path: circle(0 at var(--x) var(--y)); }
+  14% { clip-path: circle(var(--radius) at var(--x) var(--y)); }
+  36% { clip-path: circle(calc(var(--radius) * 1.2) at var(--drift-x) var(--drift-y)); }
+  58% { clip-path: circle(8vmin at var(--drift-x) var(--drift-y)); }
+  /* The four outer centers each cover their quadrant at this radius, even
+     in a square viewport. Keep their separate origins as the bubbles merge. */
+  100% { clip-path: circle(50vmax at var(--drift-x) var(--drift-y)); }
+}
+#bubble-loader.is-filled { background: #F3E082; }
+#bubble-loader.is-filled .loading-bubble { display: none; }
+#bubble-loader.is-leaving { animation: bubble-reveal 180ms ease-out both; }
+@keyframes bubble-reveal { to { opacity: 0; } }
+/* A failed module load stays bubble-only; the surface becomes an accessible
+   retry target instead of leaving an unresponsive full-screen cover. */
+#bubble-loader.has-error { background: #fff; cursor: pointer; }
+#bubble-loader.has-error .loading-bubble { display: block; animation: none; clip-path: circle(var(--radius) at var(--x) var(--y)); }
+#bubble-loader.has-error .loading-bubble:nth-child(n + 4) { display: none; }
+#bubble-loader.has-error:focus-visible { outline: 2px solid #F3E082; outline-offset: -8px; }
+#bubble-loader.is-still .loading-bubble { animation: none; clip-path: circle(var(--radius) at var(--x) var(--y)); }
+#bubble-loader.is-still .loading-bubble:nth-child(n + 4) { display: none; }
+#bubble-loader.is-still.is-leaving { animation: none; }
+@media (prefers-reduced-motion: reduce) {
+  .loading-bubble { animation: none; clip-path: circle(var(--radius) at var(--x) var(--y)); }
+  .loading-bubble:nth-child(n + 4) { display: none; }
+  #bubble-loader.is-leaving { animation: none; }
+}
