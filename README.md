@@ -20,7 +20,7 @@ The regular view uses the reference's color-family swatches; immersive Color opt
 - **start now** opens Pattern Studio.
 - **Background** changes only the viewer's flat backdrop color. Click the selected swatch again to return to off-white. The chosen background survives view changes; immersive view also uses a plain fill.
 - Hover or focus the desktop viewer to reveal **Reset view**, rotation guidance, and the current price below the circle. On phones, **Reset view** stays visible inside the circle; guidance and price are hidden to match the compact reference.
-- The normal camera fits the complete lamp body, with its suspension cord continuing to the circle's top edge as in the reference. Immersive view fits the entire model, including the cord.
+- The normal camera fits the complete lamp body. Its zoom-out limit follows the orbit angle so the existing suspension cord continues just beyond the circle's top edge, including at maximum zoom-out. Immersive view fits the entire model, including the cord, with its own zoom limits.
 
 Git checkpoint **`90f270a`** preserves the working configurator and supplied reference before this redesign.
 
@@ -75,7 +75,7 @@ Selections survive entry to and exit from immersive view. They are held in memor
 
 Each fresh visit or refresh opens on white with six small **#F3E082** bubbles appearing in a staggered sequence. They drift apart, grow from their separate positions, and overlap to fill the entire viewport in approximately **2.09 seconds**. The screen then holds in solid yellow until the scene is ready and reveals the configurator in **180ms**, followed by the existing lamp entrance. There is no visible loading text, logo, or other graphic element.
 
-The overlay starts from `index.html` before the scene bundle loads. `startup.js` waits for the existing `sceneReady` preparation: shaders, generated textures, font readiness, the decoded material-preview image, and an initial render. Fast loads still complete the bubble sequence; slow loads extend the full-yellow hold. Pointer, touch, and keyboard access to the configurator are blocked until the reveal finishes. Model, color, material, or view changes do not replay it.
+The overlay starts from `index.html` before the scene bundle loads. `startup.js` waits for the existing `sceneReady` preparation: shaders, generated textures, font readiness, the three decoded material-preview images, and an initial render. Fast loads still complete the bubble sequence; slow loads extend the full-yellow hold. Pointer, touch, and keyboard access to the configurator are blocked until the reveal finishes. Model, color, material, or view changes do not replay it.
 
 Reduced motion shows three static bubbles until readiness and opens the finished lamp without the animated fill or entrance. Enabling reduced motion mid-sequence cancels the motion and does not restart it if preferences change again. A failed main-module download leaves a bubble-only surface that can be clicked or activated with Enter/Space to retry; its accessible label explains the action. No new dependencies were added. See the [bubble-loader previews and verification](artifacts/bubble-loader/README.md).
 
@@ -148,6 +148,8 @@ These hex values describe the base material colors. Lighting, reflections, and t
 
 ### Finishes
 
+The preview swatches use the supplied images in this order: MATERIAL_1 → Matte (`material-matte.png`), MATERIAL_2 → Crystal (`material-crystal.png`), MATERIAL_3 → Ceramic (`material-ceramic.png`). The PNGs live in `public/assets/`; CSS compensates for their transparent margins. These are UI previews only; material rendering and the initial Ceramic selection are unchanged.
+
 | Finish | Appearance |
 | --- | --- |
 | Ceramic | Fine procedural grain, shallow imperfections, and a soft reflective glaze. |
@@ -204,6 +206,7 @@ my-product/
 │   ├── main.js                UI, shared state, lamp geometry, scene, and interactions
 │   ├── entrance-animation.js  Load-only reveal, assembly offsets, and light timing
 │   ├── model-transition.js    Model carousel, camera blending, and latest-selection queue
+│   ├── camera-framing.js      Perspective zoom limit for the suspension cord
 │   ├── style.css              Layout, typography, controls, and responsive styles
 │   ├── layout.css             LAYOUT_2 presentation, circular viewer, and responsive placement
 │   ├── palettes.js            Color families and Mixed color generation
@@ -226,7 +229,7 @@ The app uses **vanilla JavaScript ES modules**, **CSS**, **Vite 8**, and **Three
 | Reference | Purpose |
 | --- | --- |
 | [LAYOUT.jpg](public/assets/LAYOUT.jpg) | Viewer and configuration-panel layout. |
-| [LAYOUT_2.jpg](public/assets/LAYOUT_2.jpg) | Current visual source of truth: desktop layout, typography, buttons, circular backdrop, and material thumbnails. |
+| [LAYOUT_2.jpg](public/assets/LAYOUT_2.jpg) | Desktop layout, typography, buttons, and circular backdrop; material thumbnails use the newer supplied PNGs. |
 | [LAMPS.png](public/assets/LAMPS.png) | Sculptural lamp silhouettes. |
 | [LAYOUT-1.jpg](public/assets/LAYOUT-1.jpg) | Original color direction. |
 | [LIGHTING.jpg](public/assets/LIGHTING.jpg) | Warm, soft lighting from the left. |

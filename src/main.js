@@ -9,6 +9,7 @@ import { createCeramicEnvironment, createCeramicMaterial } from './ceramic-mater
 import { createPatternStudio } from './pattern-studio.js'
 import { createEntranceAnimation } from './entrance-animation.js'
 import { createModelTransition } from './model-transition.js'
+import { suspensionZoomLimit } from './camera-framing.js'
 
 const models = [
   { id: 'dome', name: 'BOP', price: 320 },
@@ -225,6 +226,7 @@ scene.add(floor)
 const lampRoot = new THREE.Group()
 lampRoot.rotation.y = -0.32
 scene.add(lampRoot)
+let normalCableTop
 let lampLight
 let lampBulb
 let lightReveal = 1
@@ -767,6 +769,18 @@ function frameLampForNormal() {
   return modelTransition.withRestPose(() => entrance.withRestPose(fitLampForNormal))
 }
 
+function limitNormalZoom() {
+  if (!normalCableTop || document.body.classList.contains('is-immersive') || entrance.active || modelTransition.active) return
+  controls.maxDistance = suspensionZoomLimit(camera, controls.target, normalCableTop)
+  const offset = camera.position.clone().sub(controls.target)
+  if (offset.length() > controls.maxDistance) {
+    // Keep the orbit angle and target intact; do not call controls.update()
+    // recursively from its change event. The next update adopts this radius.
+    camera.position.copy(controls.target).add(offset.setLength(controls.maxDistance))
+  }
+}
+controls.addEventListener('change', limitNormalZoom)
+
 function fitLampForNormal() {
   if (document.body.classList.contains('is-immersive') || !lampRoot.children.length) return
   lampRoot.updateMatrixWorld(true)
@@ -803,8 +817,13 @@ function fitLampForNormal() {
   }
   controls.target.copy(center)
   controls.minDistance = distance * 0.55
-  controls.maxDistance = distance * 2
   camera.position.copy(center).addScaledVector(direction, distance)
+  const cableBounds = new THREE.Box3()
+  lampRoot.children.filter(mesh => mesh.geometry && mesh.material?.userData.colorSlot === 3)
+    .forEach(mesh => cableBounds.expandByObject(mesh))
+  normalCableTop = cableBounds.getCenter(new THREE.Vector3())
+  normalCableTop.y = cableBounds.max.y
+  controls.maxDistance = suspensionZoomLimit(camera, controls.target, normalCableTop)
   controls.update()
 }
 
