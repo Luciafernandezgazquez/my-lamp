@@ -1,11 +1,13 @@
 # LAYOUT_2 review
 
+Historical review of an earlier layout iteration. The screenshots and checks below describe that version. The current configurator has three selectable finishes (Ceramic, Crystal, Matte), the headline “Make light your own.”, and no price display. See the [current documentation](../../README.md).
+
 - [Desktop comparison, 1440 × 1024](desktop-1440.png)
 - [Mobile, 390px wide, full page](mobile-390.png)
 - [Supplied reference](../../public/assets/LAYOUT_2.jpg)
 - Pre-redesign checkpoint: `90f270a`
 
-The previews use Glass / Mixed / Shine, with a warm temperature and the cream background, to compare against the reference's Glass example. This is a configuration available through the existing controls. The app still starts with Dome / Yellow / Ceramic and temperature 32.
+The previews use Glass / Mixed / Shine, with a warm temperature and the cream background, to compare against the reference's Glass example. Shine was selectable in that historical version; it is now used only as an internal glossy treatment for Crystal accents. The app still starts with Dome / Yellow / Ceramic and temperature 32.
 
 At the reference viewport, the circular viewer measures approximately 628 × 628px at (423, 269). The Model, Color, and Material groups start at (40, 269), (40, 494), and (40, 787). The right-hand groups start at (1019, 281), (1150, 514), and (1117, 778).
 
@@ -24,7 +26,7 @@ Production build and `git diff --check` passed. Chrome browser checks exercised:
 
 No application runtime errors or shader compilation failures were detected. Touch checks used Chrome's touch emulation.
 
-## Differences retained
+## Differences at capture time
 
 - Four material choices remain available; the reference shows three.
 - The reference's placeholder headline is preserved as supplied.

@@ -46,7 +46,7 @@ const paletteButtons = () => ['yellow', 'pink', 'blue', 'mixed', 'white', 'black
   <button class="color-option${state.palette === id ? ' is-selected' : ''}"
     type="button" aria-pressed="${state.palette === id}" data-palette="${id}"
     aria-label="${name}" title="${id === 'mixed' ? 'Mixed colors — generate a new combination' : name}">
-    <span class="palette-swatch" aria-hidden="true" style="--swatch-color:${shades[0]};background: linear-gradient(180deg, ${(id === 'mixed' ? ['#A9B3DD', '#F3C482', '#FFD6DC', '#D9F2CD'] : shades).map((shade, i) => `${shade} ${i * 25}% ${(i + 1) * 25}%`).join(', ')})"></span>
+    <span class="palette-swatch" aria-hidden="true" style="background: linear-gradient(180deg, ${(id === 'mixed' ? ['#A9B3DD', '#F3C482', '#FFD6DC', '#D9F2CD'] : shades).map((shade, i) => `${shade} ${i * 25}% ${(i + 1) * 25}%`).join(', ')})"></span>
     <span>${name}</span>
   </button>
 `).join('')
@@ -462,7 +462,6 @@ function updateLight() {
   slider.value = state.temperature
   slider.setAttribute('aria-valuetext', `${kelvin} kelvin`)
   document.querySelector('.temperature-control').classList.toggle('is-disabled', !state.lightOn)
-  document.querySelector('.viewer').classList.toggle('is-light-off', !state.lightOn)
   document.querySelector('#temperature-value').textContent = `${kelvin}K`
   document.documentElement.style.setProperty('--glow-color', `#${tint.getHexString()}`)
   // Studio illumination stays fixed; only the lamp's own light changes.
@@ -705,6 +704,7 @@ function enterImmersiveView() {
   modelTransition.finish()
 
   savedView = {
+    modelId: state.model.id,
     position: camera.position.clone(),
     target: controls.target.clone(),
     minDistance: controls.minDistance,
@@ -843,6 +843,11 @@ function exitImmersiveView() {
   immersiveTrigger.setAttribute('aria-expanded', 'false')
 
   if (savedView) {
+    // Settle immersive drag damping before applying the saved normal pose.
+    const damping = controls.enableDamping
+    controls.enableDamping = false
+    controls.update()
+    controls.enableDamping = damping
     camera.position.copy(savedView.position)
     controls.target.copy(savedView.target)
     controls.minDistance = savedView.minDistance
@@ -852,6 +857,7 @@ function exitImmersiveView() {
 
   requestAnimationFrame(() => {
     resize(true)
+    if (savedView?.modelId !== state.model.id) frameLampForNormal()
     immersiveTrigger.focus()
   })
 }
@@ -896,7 +902,10 @@ window.addEventListener('resize', () => {
   if (document.body.classList.contains('is-immersive')) layoutImmersiveView()
   else resize()
 })
-new ResizeObserver(() => resize()).observe(canvasWrap)
+// Layout can settle over several observer notifications after immersive exit.
+// Keep the saved view through those updates; a different model still needs
+// fresh framing. Immersive resizing continues to fit its available space.
+new ResizeObserver(() => resize(savedView?.modelId === state.model.id)).observe(canvasWrap)
 new ResizeObserver(layoutImmersiveView).observe(immersiveDock)
 
 let previousFrameTime

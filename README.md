@@ -2,7 +2,7 @@
 
 An interactive 3D lamp configurator for a playful, contemporary lighting brand. Visitors can choose a sculptural lamp, coordinate its colors, explore different finishes, adjust its glow, and draw a personal design directly on its surface.
 
-The application runs entirely in the browser. It is a product configurator prototype with a price display; it does not include a shopping cart, checkout, accounts, or a backend.
+The application runs entirely in the browser. It is a product configurator prototype; it does not include a price display, shopping cart, checkout, accounts, or a backend.
 
 ## Current layout
 
@@ -19,7 +19,7 @@ The regular view uses the reference's color-family swatches; immersive Color opt
 - Click the **04.** badge to turn the lamp on/off. Its tooltip and accessible label describe the current action; the temperature slider dims when off.
 - **start now** opens Pattern Studio.
 - **Background** changes only the viewer's flat backdrop color. Click the selected swatch again to return to off-white. The chosen background survives view changes; immersive view also uses a plain fill.
-- Hover or focus the desktop viewer to reveal **Reset view**, rotation guidance, and the current price below the circle. On phones, **Reset view** stays visible inside the circle; guidance and price are hidden to match the compact reference.
+- The desktop viewer shows **Reset view** and rotation guidance below the circle. On phones, **Reset view** stays visible inside the circle; rotation guidance is hidden to match the compact reference.
 - The normal camera fits the complete lamp body. Its zoom-out limit follows the orbit angle so the existing suspension cord continues just beyond the circle's top edge, including at maximum zoom-out. Immersive view fits the entire model, including the cord, with its own zoom limits.
 
 Git checkpoint **`90f270a`** preserves the working configurator and supplied reference before this redesign.
@@ -52,7 +52,7 @@ Run these commands from the project root:
 | `npm ci` | Install the dependency versions recorded in `package-lock.json`. |
 | `npm run dev` | Start the development server with live updates. |
 | `npm run build` | Generate the production website in `dist/`. |
-| `npm test` | Check bubble-loader handoff, entrance and model-transition timing, pose restoration, rapid selections, and reduced motion. |
+| `npm test` | Check bubble-loader handoff, entrance and model-transition timing, pose restoration, rapid selections, reduced motion, and cable zoom-limit mathematics. |
 | `npm run preview` | Serve an existing production build locally, normally on port 4173. |
 | `npm run dev -- --host 0.0.0.0` | Make the development server reachable from another device on the same network. |
 
@@ -64,12 +64,12 @@ For phone testing, use your computer's local network address and the port printe
 2. Select a **Color** palette: Pink, Yellow, Blue, White, Black, or Mixed colors.
 3. Choose a **Material**: Ceramic, Crystal, or Matte.
 4. Switch the lamp on and adjust **Light temperature** from warm through neutral to cool white.
-5. Drag the lamp to rotate it. Use the mouse wheel or a touch pinch to zoom. The desktop viewer also provides **Reset view**.
+5. Drag the lamp to rotate it. Use the mouse wheel or a touch pinch to zoom. **Reset view** restores the default framing on desktop and mobile.
 6. Open **Pattern Studio** to decorate the lamp with watercolor, lines, or polka dots.
 
-The initial configuration is **BOP / Yellow / Ceramic**, with the light on and the temperature slider at **32**, displayed as approximately **3550K**. Its displayed price is **€355**.
+The initial configuration is **BOP / Yellow / Ceramic**, with the light on and the temperature slider at **32**, displayed as approximately **3550K**.
 
-Selections survive entry to and exit from immersive view. They are held in memory for the current page session; reloading restores the defaults.
+Selections and the normal camera view survive entry to and exit from immersive view. If the model changes while immersive view is open, the normal camera fits the newly selected model on return. They are held in memory for the current page session; reloading restores the defaults.
 
 ### Bubble loading sequence
 
@@ -168,26 +168,6 @@ The emitted light color is normalized to constant linear luminance, and the ligh
 
 Switching the light off disables and dims the slider. Switching it back on restores the selected temperature. The same controls and state are used in normal and immersive views.
 
-### Displayed pricing
-
-The displayed total is the model price plus the finish surcharge, defined in [src/main.js](src/main.js). It appears with the regular viewer's auxiliary controls on hover/focus, and remains visible on smaller screens.
-
-| Model | Base price |
-| --- | --- |
-| BOP | €320 |
-| TUT | €365 |
-| ZIG | €410 |
-| PIP | €490 |
-
-| Finish | Surcharge |
-| --- | --- |
-| Ceramic | €35 |
-| Crystal | €90 |
-| Matte | €0 |
-| Shine | €55 |
-
-There is no payment processing or order submission.
-
 ## Project structure
 
 ```text
@@ -198,7 +178,7 @@ my-product/
 ├── package.json               Dependencies and npm commands
 ├── package-lock.json          Locked dependency versions
 ├── public/
-│   └── assets/                Design and ceramic reference images
+│   └── assets/                Runtime material previews and documented design references
 ├── src/
 │   ├── startup.js             Scene readiness and bubble-loader handoff
 │   ├── bubble-loader.js       Overlay lifecycle, interaction lock, and recovery
@@ -207,16 +187,14 @@ my-product/
 │   ├── entrance-animation.js  Load-only reveal, assembly offsets, and light timing
 │   ├── model-transition.js    Model carousel, camera blending, and latest-selection queue
 │   ├── camera-framing.js      Perspective zoom limit for the suspension cord
-│   ├── style.css              Layout, typography, controls, and responsive styles
+│   ├── style.css              Shared typography, components, and immersive controls
 │   ├── layout.css             LAYOUT_2 presentation, circular viewer, and responsive placement
 │   ├── palettes.js            Color families and Mixed color generation
 │   ├── light-temperature.js   Temperature interpolation and luminance normalization
 │   ├── ceramic-material.js    Ceramic shader and studio reflection environment
 │   ├── surface-paint.js       Surface projection, paint atlases, gestures, and undo history
 │   ├── pattern-studio.js      Drawing controls and confirmation dialogs
-│   ├── pattern-studio.css     Studio layout and tool styling
-│   ├── counter.js             Unused Vite starter example
-│   └── assets/                Starter assets; not used by the configurator
+│   └── pattern-studio.css     Studio layout and tool styling
 └── dist/                      Generated production build; ignored by Git
 ```
 
@@ -247,7 +225,7 @@ The current interface uses **Arial** to match the supplied layout's letterforms 
 | Change | Where to edit |
 | --- | --- |
 | Default selections | The `state` object in `src/main.js`. |
-| Models and prices | The `models` array, model builders, and model icons in `src/main.js`; icon styles in `src/style.css`. |
+| Model definitions | The `models` array, model builders, and model icons in `src/main.js`; icon styles in `src/style.css`. |
 | Palettes and Mixed behavior | `src/palettes.js`. Keep four shades per palette to preserve part assignments. |
 | Material finishes | `finishMaterial()` and the PIP model treatment in `src/main.js`. |
 | Ceramic grain, glaze, and reflections | `src/ceramic-material.js`. |
@@ -282,7 +260,7 @@ Files under `public/`, including the moodboard references, are copied into the b
 
 ## Verification and troubleshooting
 
-Run `npm test` for entrance and model-transition lifecycle checks, and `npm run build` for the production build. No lint script is configured. After a functional or visual change, also check the following in a browser:
+Run `npm test` for loading, animation lifecycle, and camera-math checks, and `npm run build` for the production build. No lint script is configured. After a functional or visual change, also check the following in a browser:
 
 - The entrance runs once in approximately 3.6 seconds, restores the exact assembled pose, and releases rotation/painting. Check reduced motion, resizing during the reveal, and changing selections before it completes.
 - Model transitions travel in both directions, settle in 0.9 seconds, preserve the final pose, and handle rapid selections without extra lamps. Check temperature/palette changes during motion, artwork confirmation, reduced motion, and drawing after completion.
@@ -291,7 +269,7 @@ Run `npm test` for entrance and model-transition lifecycle checks, and `npm run 
 - Each palette colors the correct parts; repeated Mixed clicks produce new combinations and matching swatches.
 - Warm, neutral, and cool light leave surface colors and finishes intact; off/on restores the selected temperature.
 - Mouse and touch controls work, and slider dragging does not rotate the lamp.
-- Immersive popups switch and dismiss correctly; exiting preserves selections and restores the normal view.
+- Immersive popups switch and dismiss correctly. Adjust normal zoom and rotation, enter immersive view, then exit and verify that position, target, and zoom limits are restored. Repeat with a popup open and after a viewport resize. If the selected model changes in immersive view, verify the new model is framed correctly on return.
 - Portrait, landscape, and desktop layouts keep controls usable and the lamp correctly framed.
 - Compare the regular view against `public/assets/LAYOUT_2.jpg` at 1440 × 1024; check the circle and numbered groups against the reference coordinates.
 - Background changes preserve all lamp settings, and the 04. light toggle stays connected when controls move into immersive view.

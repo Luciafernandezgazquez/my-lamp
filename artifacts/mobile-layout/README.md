@@ -1,6 +1,6 @@
 # Mobile layout review
 
-The mobile presentation follows the supplied **Android Compact - 1.jpg** Figma reference. Changes apply only at widths of **640px or less** and reuse the existing controls and 3D scene.
+These historical previews follow the supplied **Android Compact - 1.jpg** Figma reference and were captured when the mobile breakpoint was **640px**. The current mobile layout applies below **768px**, with a separate tablet layout from 768px through 1200px. See the [current documentation](../../README.md) and [responsive review](../responsive-layout/README.md) for the later layout.
 
 ## Previews
 
@@ -25,4 +25,4 @@ Chrome browser checks at **320×568, 375×812, 412×917, and 430×932** passed:
 - Artwork retention when leaving Studio and resizing to desktop and back.
 - Real-time entrance and model-transition playback, plus reduced-motion behavior.
 
-No browser runtime errors were reported. Touch checks used Chrome emulation, not physical phones. Desktop (1440px) and tablet (768px) layout measurements matched the pre-change baseline exactly. The existing 12 animation tests and production build passed; the build retains its existing large-bundle warning.
+No browser runtime errors were reported. Touch checks used Chrome emulation, not physical phones. Desktop (1440px) and tablet (768px) layout measurements matched the pre-change baseline exactly. At capture time, the existing 12 animation tests and production build passed; the build retains its existing large-bundle warning.
