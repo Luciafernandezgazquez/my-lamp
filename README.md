@@ -1,295 +1,105 @@
-# Stap — Light with character
+# STAP — Light with Character
 
-An interactive 3D lamp configurator for a playful, contemporary lighting brand. Visitors can choose a sculptural lamp, coordinate its colors, explore different finishes, adjust its glow, and draw a personal design directly on its surface.
+**Make light your own.**
 
-The application runs entirely in the browser. It is a product configurator prototype; it does not include a price display, shopping cart, checkout, accounts, or a backend.
+STAP is a playful, contemporary lighting brand concept with an interactive 3D lamp configurator. Choose a sculptural shape, explore colors and finishes, and paint directly on the lamp to create something personal and expressive.
 
-## Current layout
+The project combines graphic design, creative coding, and interactive product customization to make lighting feel more personal and expressive.
 
-The regular configurator follows [LAYOUT_2.jpg](public/assets/LAYOUT_2.jpg), designed at **1440 × 1024**: a circular viewer, numbered outline pills, circular choices, a centered headline, and the eye-shaped immersive button. The viewer now uses a plain soft off-white background with a subtle 1px neutral outline, replacing the colored gradients. Model, Color, and Material sit on the left; Light Temperature, Studio, and Background sit on the right. On smaller screens the viewer moves above a two-column control layout.
+ See [plan.md](plan.md) for the design concept, references, and development process.
 
-Below **768px**, the mobile layout follows the supplied “Android Compact - 1” Figma reference: compact header, centered headline, circular viewer, separator, then Model / Color / Material opposite Light Temperature / Studio / Background. The page scrolls vertically, swatches have larger tap areas than their visible circles, and the temperature slider remains directly accessible. These presentation changes live in `src/layout.css`; the existing scene, camera logic, animations, and shared controls are reused. See the [mobile previews and verification notes](artifacts/mobile-layout/README.md).
+## Main Features
 
-From **768px through 1200px**, the viewer occupies its own row above two aligned columns of controls. Its diameter grows from 480px to a maximum of 560px, within the available width. The stacked layout uses content-sized rows without size containment, allowing vertical scrolling instead of overlap. Above 1200px, the desktop composition remains; windows shorter than 640px scroll a minimum-height layout to keep the controls usable. Pattern Studio uses its existing immersive layout through 1200px so the lamp and tools stay together. See the [responsive review and previews](artifacts/responsive-layout/README.md).
+- **Four 3D lamps:** BOP, TUT, ZIG, and PIP.
+- **Colors and materials:** pastel, white, black, and generated Mixed palettes; Matte, Crystal, and Ceramic finishes. PIP retains a glass-like treatment for its non-ceramic options.
+- **Lighting:** warm-to-cool temperature adjustment and an on/off control. Kelvin values are visual approximations.
+- **Pattern Studio:** watercolor, lines, polka dots, eraser, custom ink, brush sizing, and undo/redo. Switch between Draw and Rotate to decorate different sides.
+- **Backgrounds:** pink, periwinkle, and peach; select the active swatch again to return to off-white.
+- **Viewing controls:** mouse/touch rotation, wheel/pinch zoom, Reset view, and an immersive mode that expands the viewer within the browser window.
+- **Motion:** yellow-bubble loading, an assembling lamp entrance, and animated model transitions, with reduced-motion support.
+- **Responsive interface:** desktop, tablet, and mobile layouts using the same scene and controls.
 
-The headline reads “Make light your own.” Three material finishes are available: Ceramic, Crystal, and Matte. The initial BOP / Yellow / Ceramic configuration is unchanged; the reference illustrates a different PIP configuration. The live models, palettes, lighting, and surface finishes retain their existing behavior.
+The starting configuration is BOP / Yellow / Ceramic. Drawings survive color, material, and view changes; switching models asks before discarding artwork. Reloading clears all customization. This prototype has no checkout, accounts, or save/export feature.
 
-The regular view uses the reference's color-family swatches; immersive Color options display the four actual shades in each palette. Mixed updates its preview after each click. Selection dots identify active model, color, and material choices without changing the reference's button shapes.
+## Technologies Used
 
-- Click the **04.** badge to turn the lamp on/off. Its tooltip and accessible label describe the current action; the temperature slider dims when off.
-- **start now** opens Pattern Studio.
-- **Background** changes only the viewer's flat backdrop color. Click the selected swatch again to return to off-white. The chosen background survives view changes; immersive view also uses a plain fill.
-- The desktop viewer shows **Reset view** and rotation guidance below the circle. On phones, **Reset view** stays visible inside the circle; rotation guidance is hidden to match the compact reference.
-- The normal camera fits the complete lamp body. Its zoom-out limit follows the orbit angle so the existing suspension cord continues just beyond the circle's top edge, including at maximum zoom-out. Immersive view fits the entire model, including the cord, with its own zoom limits.
+- **HTML, CSS, and JavaScript modules:** interface, responsive layout, and interactions; no UI framework.
+- **Three.js and OrbitControls:** 3D geometry, materials, lighting, rotation, and zoom.
+- **Vite:** local development server and production build.
+- **ESLint**, with `@eslint/js` and `globals`: JavaScript checks.
+- **Prettier:** consistent code and document formatting.
+- **Node.js test runner:** automated animation, loading, and camera tests.
+- **Vercel:** static website hosting.
 
-Git checkpoint **`90f270a`** preserves the working configurator and supplied reference before this redesign.
+Dependencies are declared in [package.json](package.json), with exact versions in `package-lock.json`.
 
-## Getting started
+## Getting Started
 
-### Requirements
+Use **Node.js 24+** and npm, plus a browser with WebGL 2 and graphics acceleration. Node.js 22.13+ within the 22.x line and 20.19+ within the 20.x line are also supported by the current tools. No API keys, environment variables, or backend are needed.
 
-- Node.js **24 or newer** and npm are recommended. The build and lint tools also support Node.js 22.13+ within the 22.x line and 20.19+ within the 20.x line.
-- A browser with JavaScript and WebGL 2 support, with graphics acceleration available.
-
-From the parent `Projects` directory:
+From the project folder:
 
 ```sh
-cd my-product
-npm ci
+npm install
 npm run dev
 ```
 
-If your terminal is already in `my-product`, skip the `cd` command. Open the local URL printed by Vite, normally `http://localhost:5173`. Vite may choose another port if that one is occupied. Stop the server with `Ctrl+C`.
+Open the URL printed in the terminal, normally `http://localhost:5173`. Use the server rather than opening the HTML file directly. To install the exact locked dependency versions, use `npm ci` instead of `npm install`.
 
-No API keys, environment variables, database, or external 3D model downloads are required. Lamp geometry and the ceramic surface finish are generated in code.
-
-### Commands
-
-Run these commands from the project root:
-
-| Command                         | Purpose                                                                                                                                                  |
-| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `npm ci`                        | Install the dependency versions recorded in `package-lock.json`.                                                                                         |
-| `npm run dev`                   | Start the development server with live updates.                                                                                                          |
-| `npm run lint`                  | Check JavaScript with ESLint; warnings also fail the check.                                                                                              |
-| `npm run format`                | Apply Prettier formatting to maintained source and documentation.                                                                                        |
-| `npm run format:check`          | Check formatting without changing files.                                                                                                                 |
-| `npm run build`                 | Generate the production website in `dist/`.                                                                                                              |
-| `npm test`                      | Check bubble-loader handoff, entrance and model-transition timing, pose restoration, rapid selections, reduced motion, and cable zoom-limit mathematics. |
-| `npm run preview`               | Serve an existing production build locally, normally on port 4173.                                                                                       |
-| `npm run dev -- --host 0.0.0.0` | Make the development server reachable from another device on the same network.                                                                           |
-
-For phone testing, use your computer's local network address and the port printed by Vite. The phone and computer must be able to reach one another on that network.
-
-## Using the configurator
-
-1. Select a **Model**: BOP, TUT, ZIG, or PIP.
-2. Select a **Color** palette: Pink, Yellow, Blue, White, Black, or Mixed colors.
-3. Choose a **Material**: Ceramic, Crystal, or Matte.
-4. Switch the lamp on and adjust **Light temperature** from warm through neutral to cool white.
-5. Drag the lamp to rotate it. Use the mouse wheel or a touch pinch to zoom. **Reset view** restores the default framing on desktop and mobile.
-6. Open **Pattern Studio** to decorate the lamp with watercolor, lines, or polka dots.
-
-The initial configuration is **BOP / Yellow / Ceramic**, with the light on and the temperature slider at **32**, displayed as approximately **3550K**.
-
-Selections and the normal camera view survive entry to and exit from immersive view. If the model changes while immersive view is open, the normal camera fits the newly selected model on return. They are held in memory for the current page session; reloading restores the defaults.
-
-### Bubble loading sequence
-
-Each fresh visit or refresh opens on white with six small **#F3E082** bubbles appearing in a staggered sequence. They drift apart, grow from their separate positions, and overlap to fill the entire viewport in approximately **2.09 seconds**. The screen then holds in solid yellow until the scene is ready and reveals the configurator in **180ms**, followed by the existing lamp entrance. There is no visible loading text, logo, or other graphic element.
-
-The overlay starts from `index.html` before the scene bundle loads. `startup.js` waits for the existing `sceneReady` preparation: shaders, generated textures, font readiness, the three decoded material-preview images, and an initial render. Fast loads still complete the bubble sequence; slow loads extend the full-yellow hold. Pointer, touch, and keyboard access to the configurator are blocked until the reveal finishes. Model, color, material, or view changes do not replay it.
-
-Reduced motion shows three static bubbles until readiness and opens the finished lamp without the animated fill or entrance. Enabling reduced motion mid-sequence cancels the motion and does not restart it if preferences change again. A failed main-module download leaves a bubble-only surface that can be clicked or activated with Enter/Space to retry; its accessible label explains the action. No new dependencies were added. See the [bubble-loader previews and verification](artifacts/bubble-loader/README.md).
-
-### Entrance animation
-
-After the bubble reveal, the lamp fades in, grows gently to its normal size, and rotates into position. The collar, shade, trim, and bulb assemble with staggered vertical motion, followed by a soft light transition. The complete lamp reveal lasts **3.6 seconds**:
-
-- **0–0.85 seconds:** fade in.
-- **0–1.7 seconds:** scale and rotation settle.
-- **0.95–2.65 seconds:** components assemble into their exact original positions.
-- **2.65–3.6 seconds:** the bulb and lamp light gradually illuminate at the selected temperature.
-
-Rotation, zoom, and painting are locked during the reveal. The configuration controls remain available: colors and temperature apply immediately; choosing a model or material, or using Reset view, completes the entrance immediately without replaying it. Opening Pattern Studio during the entrance preserves its selected Draw/Rotate mode when the reveal ends. View changes and resizes continue to fit the final assembled lamp.
-
-With `prefers-reduced-motion: reduce`, the lamp appears immediately in its finished state and automatic rotation is disabled; manual rotation and customization remain available. Enabling reduced motion during the reveal immediately completes it. The animation uses the existing render loop and adds no runtime dependencies.
-
-### Switching models
-
-Selecting a different model plays a **0.9-second horizontal 3D carousel transition**, adapted from the actual video in the [Pinterest reference](https://ca.pinterest.com/pin/286893438754010068/). The outgoing lamp moves sideways and turns away while the incoming lamp approaches from the opposite side and settles at its original scale and orientation. Both remain solid, with a little depth travel and smooth camera framing. Choosing an earlier model reverses the direction. Geometry, component positions, materials, and the page layout are unchanged.
-
-Rotation, zoom, and painting are locked during the transition. Color and lighting controls apply to both visible lamps. Rapid clicks retain only the latest pending selection; at most two lamps exist during the handoff, and the outgoing geometry, materials, and paint textures are released afterward. Clicking the arriving model cancels any pending change. Pattern Studio keeps its existing confirmation before discarding artwork, and returns to its selected Draw/Rotate mode afterward.
-
-Changing material, resetting the camera, resizing, or entering/leaving immersive view immediately settles the latest selected model. Reduced motion switches models immediately. Model changes never replay the initial entrance animation. The transition runs in the existing Three.js render loop without additional dependencies.
-
-### Immersive view
-
-Use the circular button at the top-right of the page to fill the browser viewport with the lamp viewer. This expands the page layout without invoking the browser's native fullscreen API.
-
-- The model name remains at the top-left, with an exit button at the top-right.
-- Five icon buttons provide **Model**, **Color**, **Material**, **Light Temperature**, and **Pattern Studio** controls.
-- Each button opens a compact popup. Only one popup is open at a time.
-- Click outside, use the popup's close button, or press **Escape** to close a popup. Pressing Escape with no popup open exits immersive view.
-- The light on/off button is available inside the Light Temperature popup.
-- The camera and viewer resize to leave room for the controls. On short landscape screens, the controls sit beside the lamp. The selected background becomes a plain backdrop in this view.
-- Exiting restores the regular layout and its saved camera view, while retaining the chosen configuration.
-
-### Pattern Studio
-
-Open the studio from the configuration panel or the immersive toolbar. On smaller screens, the normal-panel button opens the immersive studio to keep the lamp and tools together. On desktop, immersive drawing tools sit beside the lamp.
-
-- **Draw** paints with a mouse or finger and locks camera rotation. **Rotate** enables dragging and wheel/pinch zoom without making marks.
-- **Watercolor** has soft, slightly irregular edges and fine grain. Its translucent strokes darken when overlapped.
-- **Lines** draws continuous strokes. **Polka dots** places one dot per tap/click, or evenly spaced dots while dragging.
-- Choose a preset ink or any custom color, adjust **Tool size**, and use **Dot spacing** to change the distance between dots.
-- **Eraser** removes artwork while preserving the selected base color and material.
-- **Undo/Redo** works per stroke, including erasing and clearing. Shortcuts are Ctrl/Cmd+Z and Ctrl/Cmd+Shift+Z (or Ctrl+Y). History retains up to 30 actions, with a memory budget that may retain fewer large actions.
-- **Clear drawing** asks for confirmation and can be undone. Switching models also asks for confirmation when artwork exists; confirming removes that model's drawing and undo history.
-
-Artwork stays attached during rotation and zoom and survives closing the studio, changing palettes or finishes, and entering/leaving immersive view. The bulb is excluded from drawing. Clicking the viewer keeps the studio open; use Done, the popup close button, or Escape to close it.
-
-Artwork is held in memory for the current page session. Reloading clears it; there is no save/export feature yet.
-
-## Colors and materials
-
-### Pastel palettes
-
-The four shades are assigned to the model's primary body, accents, trim, and cable. The exact geometry assigned to each role varies by model. Swatches and lamp colors share the same palette definitions in [src/palettes.js](src/palettes.js).
-
-| Palette | Primary   | Accent    | Trim      | Cable     |
-| ------- | --------- | --------- | --------- | --------- |
-| Pink    | `#EDB5C5` | `#D69BAE` | `#F4CCD7` | `#FBE5EA` |
-| Yellow  | `#F2E3AB` | `#D9C78F` | `#E8CEAA` | `#FCF4D9` |
-| Blue    | `#BEC5E7` | `#9DA8CE` | `#D5D9EF` | `#EEF0FA` |
-| White   | `#FFFFFF` | `#FFFFFF` | `#FFFFFF` | `#FFFFFF` |
-| Black   | `#000000` | `#000000` | `#000000` | `#000000` |
-
-**Mixed colors** generates four distinct shades from the Pink, Yellow, and Blue families. Each click includes all three families, changes every part's assigned color, and changes the primary color family from the previous combination. Its swatch updates to show the generated colors. Color changes preserve the selected model, finish, lighting, and camera.
-
-These hex values describe the base material colors. Lighting, reflections, and transparency affect how they appear on screen.
-
-### Finishes
-
-The preview swatches use the supplied images in this order: MATERIAL_1 → Matte (`material-matte.png`), MATERIAL_2 → Crystal (`material-crystal.png`), MATERIAL_3 → Ceramic (`material-ceramic.png`). The PNGs live in `public/assets/`; CSS compensates for their transparent margins. These are UI previews only; material rendering and the initial Ceramic selection are unchanged.
-
-| Finish  | Appearance                                                                 |
-| ------- | -------------------------------------------------------------------------- |
-| Ceramic | Fine procedural grain, shallow imperfections, and a soft reflective glaze. |
-| Crystal | Transparent, light-transmitting material with glossy reflections.          |
-| Matte   | A rough surface with subdued highlights.                                   |
-
-Ceramic uses object-space surface detail to avoid UV seams and keep the grain attached to the lamp during rotation. Scaled geometry keeps the grain consistent across differently shaped parts; subpixel detail fades at a distance to reduce shimmer. A shared, neutral studio environment supplies broad reflections. The reference photographs guide the finish and are not applied as color textures.
-
-The PIP model uses the ceramic finish when Ceramic is selected. Its other finish choices retain the model's glass treatment. With Crystal selected, accent parts use a glossy finish for definition.
-
-### Lighting
-
-The temperature slider runs from 0 to 100, with displayed reference points of **2700K**, **4000K**, and **6500K**. It smoothly blends warm white (`#FFE6AD`) through neutral white (`#FFFFFF`) to cool white (`#F4F7FF`). These are artistic color approximations rather than a physically calibrated color-temperature simulation.
-
-The emitted light color is normalized to constant linear luminance, and the light intensity remains fixed across the range. Temperature changes affect the bulb's emissive glow and the lamp's point light; they do not rewrite the painted surfaces' base colors or emissive properties. Nearby surfaces can still respond naturally to illumination. Studio lighting remains fixed.
-
-Switching the light off disables and dims the slider. Switching it back on restores the selected temperature. The same controls and state are used in normal and immersive views.
-
-## Project structure
-
-```text
-my-product/
-├── README.md                  Project documentation
-├── plan.md                    Original design brief and moodboard notes
-├── index.html                 HTML entry point and page metadata
-├── package.json               Dependencies and npm commands
-├── package-lock.json          Locked dependency versions
-├── public/
-│   └── assets/                Runtime material previews and documented design references
-├── src/
-│   ├── startup.js             Scene readiness and bubble-loader handoff
-│   ├── bubble-loader.js       Overlay lifecycle, interaction lock, and recovery
-│   ├── bubble-loader.css      Bubble motion, yellow fill, and reduced motion
-│   ├── main.js                UI, shared state, lamp geometry, scene, and interactions
-│   ├── entrance-animation.js  Load-only reveal, assembly offsets, and light timing
-│   ├── model-transition.js    Model carousel, camera blending, and latest-selection queue
-│   ├── camera-framing.js      Perspective zoom limit for the suspension cord
-│   ├── style.css              Shared typography, components, and immersive controls
-│   ├── layout.css             LAYOUT_2 presentation, circular viewer, and responsive placement
-│   ├── palettes.js            Color families and Mixed color generation
-│   ├── light-temperature.js   Temperature interpolation and luminance normalization
-│   ├── ceramic-material.js    Ceramic shader and studio reflection environment
-│   ├── surface-paint.js       Surface projection, paint atlases, gestures, and undo history
-│   ├── pattern-studio.js      Drawing controls and confirmation dialogs
-│   └── pattern-studio.css     Studio layout and tool styling
-└── dist/                      Generated production build; ignored by Git
-```
-
-The app uses **vanilla JavaScript ES modules**, **CSS**, **Vite 8**, and **Three.js 0.186** with `OrbitControls`. There is no UI framework. Dependency ranges are in `package.json`; exact installed versions are recorded in `package-lock.json`.
-
-## Design references and typography
-
-[plan.md](plan.md) records the original design direction: sculptural shapes, playful colors, a clean interface, and warm light from the left. The implementation includes later refinements such as the pastel palettes and immersive controls; the original brief's palette is not the current palette source.
-
-| Reference                                                          | Purpose                                                                                                      |
-| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| [LAYOUT.jpg](public/assets/LAYOUT.jpg)                             | Viewer and configuration-panel layout.                                                                       |
-| [LAYOUT_2.jpg](public/assets/LAYOUT_2.jpg)                         | Desktop layout, typography, buttons, and circular backdrop; material thumbnails use the newer supplied PNGs. |
-| [LAMPS.png](public/assets/LAMPS.png)                               | Sculptural lamp silhouettes.                                                                                 |
-| [LAYOUT-1.jpg](public/assets/LAYOUT-1.jpg)                         | Original color direction.                                                                                    |
-| [LIGHTING.jpg](public/assets/LIGHTING.jpg)                         | Warm, soft lighting from the left.                                                                           |
-| [LOGO.jpg](public/assets/LOGO.jpg)                                 | Stap logo direction.                                                                                         |
-| [MATERIALS.jpg](public/assets/MATERIALS.jpg)                       | Finish options.                                                                                              |
-| [TYPOGRAPHY.jpg](public/assets/TYPOGRAPHY.jpg)                     | Typography direction.                                                                                        |
-| [ceramic-reference-01.jpg](public/assets/ceramic-reference-01.jpg) | Surface texture and fine grain.                                                                              |
-| [ceramic-reference-02.jpg](public/assets/ceramic-reference-02.jpg) | Glaze and soft reflections.                                                                                  |
-| [ceramic-reference-03.jpg](public/assets/ceramic-reference-03.jpg) | Subtle surface imperfections.                                                                                |
-
-The current interface uses **Arial** to match the supplied layout's letterforms and spacing. The logo uses locally installed Neue Haas Display Roman/Light through `@font-face` local sources, with Helvetica Neue, Helvetica, and Arial fallbacks. No font binaries or third-party font requests are bundled. Logo metrics may vary on machines without those local fonts.
-
-## Making changes
-
-| Change                                              | Where to edit                                                                                                                    |
-| --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| Default selections                                  | The `state` object in `src/main.js`.                                                                                             |
-| Model definitions                                   | The `models` array, model builders, and model icons in `src/main.js`; icon styles in `src/style.css`.                            |
-| Palettes and Mixed behavior                         | `src/palettes.js`. Keep four shades per palette to preserve part assignments.                                                    |
-| Material finishes                                   | `finishMaterial()` and the PIP model treatment in `src/main.js`.                                                                 |
-| Ceramic grain, glaze, and reflections               | `src/ceramic-material.js`.                                                                                                       |
-| Drawing brushes, projection, and history            | `src/surface-paint.js`; controls in `src/pattern-studio.js` and `src/pattern-studio.css`.                                        |
-| Light temperature and displayed Kelvin values       | `src/light-temperature.js`; keep the slider gradients in `src/style.css` consistent with its endpoint colors.                    |
-| Current layout and responsive behavior              | `src/layout.css`, loaded after the existing component styles; immersive placement and camera framing functions in `src/main.js`. |
-| Headline, numbered sections, and background choices | The page template and background handler in `src/main.js`.                                                                       |
-| Page title and description                          | `index.html`.                                                                                                                    |
-
-Customizable materials carry `userData.colorSlot`, which maps them to one of the four palette shades. Keep the bulb material separate from painted surfaces when adding models or finishes. Immersive popups move the existing controls between layouts rather than duplicating their state or event handlers.
-
-The ceramic implementation extends Three.js shader chunks through `onBeforeCompile`. After upgrading Three.js, verify the ceramic shader in a browser as well as running the production build.
-
-Pattern Studio adds transparent paint atlases through the material shader while retaining the original surface finish. Pointer rays select the nearest visible surface; brush footprints are clipped to its triangles and projected into UV space. Cylinder caps have separate atlas regions, and double-sided surfaces have separate front/back sheets. New primitives need non-overlapping UVs. Mesh order and UV layout must stay consistent across finish rebuilds to preserve artwork. Atlases are allocated only on painted parts, and undo history records changed tiles rather than full images.
-
-## Build and deployment
+Create and inspect a production build:
 
 ```sh
 npm run build
 npm run preview
 ```
 
-Deploy the contents of `dist/` to a static web host. No Node.js application server is needed after the build. `npm run preview` is for local inspection of that build.
+The build is written to `dist/`; preview normally runs at `http://localhost:4173`. Deploy `dist/` to a static host. Edit source files, not the generated files in `dist/`.
 
-The default build assumes deployment at the domain root. For a subdirectory, supply the deployment path when building, for example:
+## Project Structure
 
-```sh
-npm run build -- --base=/lamp-configurator/
-```
+| Location                                    | Purpose                                                                                       |
+| ------------------------------------------- | --------------------------------------------------------------------------------------------- |
+| `index.html`                                | Page entry point, loading overlay, title, and favicon.                                        |
+| `src/main.js`                               | Shared state, lamp construction, scene, and viewing controls.                                 |
+| `src/`                                      | Animation, camera, palette, lighting, material, and painting modules, plus responsive styles. |
+| `public/assets/`                            | Material thumbnails, STAP favicon, and design-reference images.                               |
+| `tests/`                                    | Automated loading, entrance, model-transition, and camera tests.                              |
+| `artifacts/`                                | Development screenshots and browser-review notes.                                             |
+| `plan.md`                                   | Design decisions, development history, and known limitations.                                 |
+| `package.json` and tool configuration files | Dependencies, commands, linting, and formatting rules.                                        |
 
-Files under `public/`, including the moodboard references, are copied into the build. `node_modules/` and `dist/` are ignored by Git; keep `package-lock.json` committed for reproducible dependency installation.
+## Live Website
 
-## Verification and troubleshooting
+[Explore the STAP configurator](https://my-lamp-omega.vercel.app/)
 
-Run `npm run lint` and `npm run format:check` for code-quality checks, `npm test` for loading, animation lifecycle, and camera-math checks, and `npm run build` for the production build. ESLint uses recommended JavaScript rules with browser globals for `src/` and Node.js globals for tests and configuration. Prettier preserves the project's single quotes and omitted semicolons, and leaves embedded template code alone. Dependencies, build output, coverage, imported assets, and historical review artifacts are excluded; the generated package lockfile is also excluded from formatting. After a functional or visual change, also check the following in a browser:
+## Code Quality & Testing
 
-- The entrance runs once in approximately 3.6 seconds, restores the exact assembled pose, and releases rotation/painting. Check reduced motion, resizing during the reveal, and changing selections before it completes.
-- Model transitions travel in both directions, settle in 0.9 seconds, preserve the final pose, and handle rapid selections without extra lamps. Check temperature/palette changes during motion, artwork confirmation, reduced motion, and drawing after completion.
+| Command                | Purpose                                        |
+| ---------------------- | ---------------------------------------------- |
+| `npm test`             | Run the automated tests.                       |
+| `npm run lint`         | Check JavaScript with ESLint.                  |
+| `npm run format`       | Apply Prettier formatting; this changes files. |
+| `npm run format:check` | Check formatting without changing files.       |
+| `npm run build`        | Verify the production build.                   |
 
-- All four models and all finishes render without browser-console or WebGL errors.
-- Each palette colors the correct parts; repeated Mixed clicks produce new combinations and matching swatches.
-- Warm, neutral, and cool light leave surface colors and finishes intact; off/on restores the selected temperature.
-- Mouse and touch controls work, and slider dragging does not rotate the lamp.
-- Immersive popups switch and dismiss correctly. Adjust normal zoom and rotation, enter immersive view, then exit and verify that position, target, and zoom limits are restored. Repeat with a popup open and after a viewport resize. If the selected model changes in immersive view, verify the new model is framed correctly on return.
-- Portrait, landscape, and desktop layouts keep controls usable and the lamp correctly framed.
-- Compare the regular view against `public/assets/LAYOUT_2.jpg` at 1440 × 1024; check the circle and numbered groups against the reference coordinates.
-- Background changes preserve all lamp settings, and the 04. light toggle stays connected when controls move into immersive view.
-- Ceramic grain remains subtle and stable during rotation and zoom, with no visible seams or sparkling.
-- All drawing tools work on mouse and touch; Draw locks rotation and Rotate makes no marks.
-- Artwork stays on the decorated surface without appearing on opposite sides or cylinder caps.
-- Undo/redo, erasing, clear confirmation, and model-switch confirmation work; palette, material, and view changes retain artwork.
+**Verified on 5 November 2026:** all **19 tests**, ESLint, and the production build pass. Prettier passed at the code-quality checkpoint (`e1b9075`); the latest check flags formatting in the subsequently edited `plan.md`. This README passes its formatting check.
 
-| Issue                                         | What to check                                                                                                                                                |
-| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Dependency installation or Vite startup fails | Check `node --version` against the requirements above, and run commands from `my-product`.                                                                   |
-| The viewer is blank                           | Use the Vite server or a hosted build rather than opening `index.html` directly. Check WebGL 2 availability, graphics acceleration, and the browser console. |
-| The temperature slider is disabled            | Switch the lamp's light on. In immersive view, the switch is in the Light Temperature popup.                                                                 |
-| Typography differs between machines           | The named font is not bundled; a fallback font may be in use.                                                                                                |
-| The build reports a large JavaScript chunk    | Three.js is included in the application bundle. A chunk-size warning alone does not mean the build failed.                                                   |
-| Selections disappear after a reload           | Configuration is currently stored only in page memory, not local storage or a database.                                                                      |
+Browser reviews cover desktop/tablet/mobile sizing and Chrome touch emulation; these are separate from automated unit tests and physical-device testing. See [responsive review notes](artifacts/responsive-layout/README.md) and [plan.md](plan.md) for the verification scope.
 
-## License
+The build retains a warning about a roughly **612 KB** JavaScript chunk. The last dependency audit also reported six vulnerabilities in development/build dependencies; these remain pending review. Neither warning has been hidden or resolved by documentation changes.
 
-No project license file is currently included. Third-party package license information is provided with the installed dependencies.
+## Credits & References
+
+- **Design:** supplied STAP layouts and moodboard assets, with the [Figma design](https://www.figma.com/design/OhxRttkQWmMvwc4RKxBYb9/Untitled?node-id=0-1) linked in the plan. The full reference inventory is in [plan.md](plan.md#original-references-and-design-assets).
+
+- **Images:** `public/assets/` includes the layout, lamp, lighting, logo, typography, and material moodboards; `ceramic-reference-01.jpg` through `03.jpg`; and `material-matte.png`, `material-crystal.png`, and `material-ceramic.png`. 
+
+- **Motion references:** the [Pinterest model-transition reference](https://ca.pinterest.com/pin/286893438754010068/) 
+
+- **Fonts and logo:** the interface uses Arial with Helvetica Neue, Helvetica, and sans-serif fallbacks. The page logo requests locally installed Neue Haas Display Roman/Light, with fallback fonts.
+
+- **3D assets:** lamp geometry, ceramic detail, and the reflection environment are generated in code. No external 3D models or photographic surface textures are loaded; the material PNGs are UI previews.
+
+- **Open-source software:** [Three.js](https://github.com/mrdoob/three.js), [Vite](https://github.com/vitejs/vite), [ESLint and @eslint/js](https://github.com/eslint/eslint), [globals](https://github.com/sindresorhus/globals), and [Prettier](https://github.com/prettier/prettier) declare MIT licenses in the installed packages. Their copyright and license notices remain applicable; bundled/transitive dependencies have their own notices.
+
+No project-wide license has been selected. Third-party library licenses do not grant reuse rights to the project's reference images, logo, or fonts. Confirm outstanding credits and permissions before submission or redistribution.
