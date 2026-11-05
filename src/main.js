@@ -21,9 +21,30 @@ const models = [
 const materials = [
   // Reference order: MATERIAL_1 (Matte), MATERIAL_2 (Crystal), MATERIAL_3 (Ceramic).
   // Preview sizing compensates for transparent padding without editing the PNGs.
-  { id: 'matte', name: 'Matte', price: 0, preview: 'material-matte.png', previewSize: '109.4%', previewY: '50%' },
-  { id: 'crystal', name: 'Crystal', price: 90, preview: 'material-crystal.png', previewSize: '153%', previewY: '54.3%' },
-  { id: 'ceramic', name: 'Ceramic', price: 35, preview: 'material-ceramic.png', previewSize: '112.25%', previewY: '50%' },
+  {
+    id: 'matte',
+    name: 'Matte',
+    price: 0,
+    preview: 'material-matte.png',
+    previewSize: '109.4%',
+    previewY: '50%',
+  },
+  {
+    id: 'crystal',
+    name: 'Crystal',
+    price: 90,
+    preview: 'material-crystal.png',
+    previewSize: '153%',
+    previewY: '54.3%',
+  },
+  {
+    id: 'ceramic',
+    name: 'Ceramic',
+    price: 35,
+    preview: 'material-ceramic.png',
+    previewSize: '112.25%',
+    previewY: '50%',
+  },
 ]
 
 const state = {
@@ -36,27 +57,53 @@ const state = {
   background: 'cream',
 }
 
-const modelIcon = (id) => `
+const modelIcon = id => `
   <span class="model-icon model-icon--${id}" aria-hidden="true">
     <i></i><b></b><em></em>
   </span>
 `
 
-const paletteButtons = () => ['yellow', 'pink', 'blue', 'mixed', 'white', 'black'].map(id => palettes.find(palette => palette.id === id)).map(({ id, name, shades }) => `
+const paletteButtons = () =>
+  ['yellow', 'pink', 'blue', 'mixed', 'white', 'black']
+    .map(id => palettes.find(palette => palette.id === id))
+    .map(
+      ({ id, name, shades }) => `
   <button class="color-option${state.palette === id ? ' is-selected' : ''}"
     type="button" aria-pressed="${state.palette === id}" data-palette="${id}"
     aria-label="${name}" title="${id === 'mixed' ? 'Mixed colors — generate a new combination' : name}">
     <span class="palette-swatch" aria-hidden="true" style="background: linear-gradient(180deg, ${(id === 'mixed' ? ['#A9B3DD', '#F3C482', '#FFD6DC', '#D9F2CD'] : shades).map((shade, i) => `${shade} ${i * 25}% ${(i + 1) * 25}%`).join(', ')})"></span>
     <span>${name}</span>
   </button>
-`).join('')
+`,
+    )
+    .join('')
 
 const immersiveCategories = [
-  { id: 'model', label: 'Model', icon: '<path d="M12 3v4M7 15h10M5 15a7 7 0 0 1 14 0v2H5zM9 20h6"/>' },
-  { id: 'color', label: 'Color', icon: '<circle cx="9" cy="8" r="4"/><circle cx="15" cy="8" r="4"/><circle cx="12" cy="14" r="4"/>' },
-  { id: 'material', label: 'Material', icon: '<path d="m12 3 9 5-9 5-9-5zM3 12l9 5 9-5M3 16l9 5 9-5"/>' },
-  { id: 'temperature', label: 'Light Temperature', icon: '<path d="M10 14V5a2 2 0 0 1 4 0v9a4 4 0 1 1-4 0ZM12 8v9M17 6h3M17 10h2"/>' },
-  { id: 'pattern', label: 'Pattern Studio', icon: '<path d="m14 4 6 6-9 9H5v-6zM12 6l6 6M4 21h16"/>' },
+  {
+    id: 'model',
+    label: 'Model',
+    icon: '<path d="M12 3v4M7 15h10M5 15a7 7 0 0 1 14 0v2H5zM9 20h6"/>',
+  },
+  {
+    id: 'color',
+    label: 'Color',
+    icon: '<circle cx="9" cy="8" r="4"/><circle cx="15" cy="8" r="4"/><circle cx="12" cy="14" r="4"/>',
+  },
+  {
+    id: 'material',
+    label: 'Material',
+    icon: '<path d="m12 3 9 5-9 5-9-5zM3 12l9 5 9-5M3 16l9 5 9-5"/>',
+  },
+  {
+    id: 'temperature',
+    label: 'Light Temperature',
+    icon: '<path d="M10 14V5a2 2 0 0 1 4 0v9a4 4 0 1 1-4 0ZM12 8v9M17 6h3M17 10h2"/>',
+  },
+  {
+    id: 'pattern',
+    label: 'Pattern Studio',
+    icon: '<path d="m14 4 6 6-9 9H5v-6zM12 6l6 6M4 21h16"/>',
+  },
 ]
 
 document.querySelector('#app').innerHTML = `
@@ -95,12 +142,16 @@ document.querySelector('#app').innerHTML = `
             <div class="immersive-popup-content"></div>
           </section>
           <div class="immersive-bar" role="group" aria-label="Lamp configuration">
-            ${immersiveCategories.map(({ id, label, icon }) => `
+            ${immersiveCategories
+              .map(
+                ({ id, label, icon }) => `
               <button type="button" class="immersive-tool" data-panel="${id}" aria-controls="immersive-popup" aria-expanded="false">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${icon}</svg>
                 <span>${label}</span>
               </button>
-            `).join('')}
+            `,
+              )
+              .join('')}
           </div>
         </div>
       </section>
@@ -109,13 +160,17 @@ document.querySelector('#app').innerHTML = `
         <section class="control-section model-control">
           <div class="section-title"><span>01.</span><h3>Model</h3></div>
           <div class="model-grid" role="radiogroup" aria-label="Lamp model">
-            ${models.map((model, index) => `
+            ${models
+              .map(
+                (model, index) => `
               <button class="model-option${index === 0 ? ' is-selected' : ''}" type="button" role="radio" aria-label="${model.name}" title="${model.name}" aria-checked="${index === 0}" data-model="${model.id}">
                 ${modelIcon(model.id)}
                 <span>${model.name}</span>
                 <small>0${index + 1}</small>
               </button>
-            `).join('')}
+            `,
+              )
+              .join('')}
           </div>
         </section>
 
@@ -128,12 +183,16 @@ document.querySelector('#app').innerHTML = `
         <section class="control-section material-control">
             <div class="section-title"><span>03.</span><h3>Material</h3></div>
             <div class="material-grid" role="radiogroup" aria-label="Lamp material">
-              ${materials.map(material => `
+              ${materials
+                .map(
+                  material => `
                 <button class="material-option${material.id === state.material.id ? ' is-selected' : ''}" type="button" role="radio" aria-label="${material.name}" title="${material.name}" aria-checked="${material.id === state.material.id}" data-material="${material.id}">
                   <i class="material-sample" aria-hidden="true" style="--material-preview: url('${import.meta.env.BASE_URL}assets/${material.preview}'); --material-preview-size: ${material.previewSize}; --material-preview-y: ${material.previewY}"></i>
                   <span>${material.name}</span>
                 </button>
-              `).join('')}
+              `,
+                )
+                .join('')}
             </div>
         </section>
 
@@ -156,7 +215,16 @@ document.querySelector('#app').innerHTML = `
         <section class="control-section background-control">
           <div class="section-title"><span>06.</span><h3>Background</h3></div>
           <div class="background-options" role="group" aria-label="Viewer background">
-            ${[{id:'pink', name:'Pink', color:'#FFD6DC'}, {id:'blue', name:'Periwinkle', color:'#C5D0FF'}, {id:'peach', name:'Peach', color:'#F3C482'}].map(({id,name,color}) => `<button type="button" data-background="${id}" aria-label="${name} background" aria-pressed="false" title="${name} background — click again for off-white" style="--background-swatch:${color}"></button>`).join('')}
+            ${[
+              { id: 'pink', name: 'Pink', color: '#FFD6DC' },
+              { id: 'blue', name: 'Periwinkle', color: '#C5D0FF' },
+              { id: 'peach', name: 'Peach', color: '#F3C482' },
+            ]
+              .map(
+                ({ id, name, color }) =>
+                  `<button type="button" data-background="${id}" aria-label="${name} background" aria-pressed="false" title="${name} background — click again for off-white" style="--background-swatch:${color}"></button>`,
+              )
+              .join('')}
           </div>
         </section>
         <section class="pattern-panel" id="pattern-panel" aria-label="Pattern Studio" hidden></section>
@@ -180,7 +248,12 @@ canvasWrap.appendChild(renderer.domElement)
 const ceramicEnvironment = createCeramicEnvironment(renderer)
 
 const scene = new THREE.Scene()
-const camera = new THREE.PerspectiveCamera(32, canvasWrap.clientWidth / canvasWrap.clientHeight, 0.1, 100)
+const camera = new THREE.PerspectiveCamera(
+  32,
+  canvasWrap.clientWidth / canvasWrap.clientHeight,
+  0.1,
+  100,
+)
 camera.position.set(5.2, 1.1, 8.5)
 
 const motionPreference = window.matchMedia('(prefers-reduced-motion: reduce)')
@@ -231,7 +304,13 @@ let lampLight
 let lampBulb
 let lightReveal = 1
 let normalStudioOpen = false
-const studio = createPatternStudio({ canvas: renderer.domElement, camera, controls, root: lampRoot, onClose: closePatternStudio })
+const studio = createPatternStudio({
+  canvas: renderer.domElement,
+  camera,
+  controls,
+  root: lampRoot,
+  onClose: closePatternStudio,
+})
 const entrance = createEntranceAnimation({
   root: lampRoot,
   canvas: renderer.domElement,
@@ -243,17 +322,27 @@ const entrance = createEntranceAnimation({
   onLock: setLampInteractionLocked,
 })
 const modelTransition = createModelTransition({
-  root: lampRoot, scene, camera, controls, motionPreference,
+  root: lampRoot,
+  scene,
+  camera,
+  controls,
+  motionPreference,
   currentId: () => state.model.id,
   modelIds: models.map(model => model.id),
   swap: swapModel,
-  frame: () => document.body.classList.contains('is-immersive') ? frameLampForImmersive() : frameLampForNormal(),
+  frame: () =>
+    document.body.classList.contains('is-immersive')
+      ? frameLampForImmersive()
+      : frameLampForNormal(),
   dispose: disposeLamp,
   onLock: setLampInteractionLocked,
 })
 
 function setLampInteractionLocked(locked) {
-  controls.autoRotate = !locked && !motionPreference.matches && !(studio.paint.open && studio.paint.settings.mode === 'draw')
+  controls.autoRotate =
+    !locked &&
+    !motionPreference.matches &&
+    !(studio.paint.open && studio.paint.settings.mode === 'draw')
   studio.paint.setInteractionLocked(locked)
 }
 
@@ -278,7 +367,13 @@ function finishMaterial(color, materialId) {
     })
   }
   if (materialId === 'shine') {
-    return new THREE.MeshPhysicalMaterial({ ...options, roughness: 0.08, metalness: 0.02, clearcoat: 1, clearcoatRoughness: 0.06 })
+    return new THREE.MeshPhysicalMaterial({
+      ...options,
+      roughness: 0.08,
+      metalness: 0.02,
+      clearcoat: 1,
+      clearcoatRoughness: 0.06,
+    })
   }
   if (materialId === 'matte') {
     return new THREE.MeshStandardMaterial({ ...options, roughness: 0.88, metalness: 0 })
@@ -286,7 +381,13 @@ function finishMaterial(color, materialId) {
   return createCeramicMaterial(base, ceramicEnvironment.texture)
 }
 
-function addMesh(geometry, material, position = [0, 0, 0], rotation = [0, 0, 0], scale = [1, 1, 1]) {
+function addMesh(
+  geometry,
+  material,
+  position = [0, 0, 0],
+  rotation = [0, 0, 0],
+  scale = [1, 1, 1],
+) {
   // Keep procedural grain equally sized on narrow, round, and flattened parts.
   if (material.userData.isCeramic) geometry.scale(...scale)
   const mesh = new THREE.Mesh(geometry, material)
@@ -301,7 +402,11 @@ function addMesh(geometry, material, position = [0, 0, 0], rotation = [0, 0, 0],
 
 function addCable(topY, material) {
   const ceilingY = 3.15
-  addMesh(new THREE.CylinderGeometry(0.026, 0.026, ceilingY - topY, 16), material, [0, topY + (ceilingY - topY) / 2, 0])
+  addMesh(new THREE.CylinderGeometry(0.026, 0.026, ceilingY - topY, 16), material, [
+    0,
+    topY + (ceilingY - topY) / 2,
+    0,
+  ])
 }
 
 function addGlow(y, size = 0.58) {
@@ -327,8 +432,7 @@ function buildDome(material, accent, trim, cable) {
   addMesh(new THREE.CylinderGeometry(1.45, 1.82, 1.08, 64, 1, true), material, [0, -0.02, 0])
   addMesh(new THREE.TorusGeometry(1.81, 0.055, 16, 64), trim, [0, -0.56, 0], [Math.PI / 2, 0, 0])
   // The broad underside is a finished surface, separate from the glowing bulb.
-  addMesh(new THREE.CircleGeometry(1.81, 64), trim,
-    [0, -0.555, 0], [Math.PI / 2, 0, 0])
+  addMesh(new THREE.CircleGeometry(1.81, 64), trim, [0, -0.555, 0], [Math.PI / 2, 0, 0])
   addGlow(-0.72, 0.44)
 }
 
@@ -338,7 +442,13 @@ function buildOrbit(material, accent, trim, cable) {
   // A short hub joins the upper ball to the body through the decorative ring.
   addMesh(new THREE.CylinderGeometry(0.24, 0.24, 0.47, 40), accent, [0, 0.485, 0])
   addMesh(new THREE.TorusGeometry(0.72, 0.19, 24, 64), trim, [0, 0.46, 0], [Math.PI / 2, 0, 0])
-  addMesh(new THREE.SphereGeometry(1.35, 64, 32), material, [0, -0.08, 0], [0, 0, 0], [1.24, 0.34, 1.24])
+  addMesh(
+    new THREE.SphereGeometry(1.35, 64, 32),
+    material,
+    [0, -0.08, 0],
+    [0, 0, 0],
+    [1.24, 0.34, 1.24],
+  )
   addMesh(new THREE.TorusGeometry(1.45, 0.08, 18, 64), trim, [0, -0.08, 0], [Math.PI / 2, 0, 0])
   addGlow(-0.78, 0.62)
 }
@@ -355,7 +465,11 @@ function buildTier(material, accent, trim, cable) {
   const stemBottom = topY + topHeight / 2 - jointOverlap
   const stemTop = 1.365
   addCable(1.35, cable)
-  addMesh(new THREE.CylinderGeometry(0.22, 0.28, stemTop - stemBottom, 40), accent, [0, (stemTop + stemBottom) / 2, 0])
+  addMesh(new THREE.CylinderGeometry(0.22, 0.28, stemTop - stemBottom, 40), accent, [
+    0,
+    (stemTop + stemBottom) / 2,
+    0,
+  ])
   addMesh(new THREE.CylinderGeometry(1.54, 1.54, topHeight, 64), material, [0, topY, 0])
   addMesh(new THREE.CylinderGeometry(1.2, 1.2, middleHeight, 64), accent, [0, middleY, 0])
   addMesh(new THREE.CylinderGeometry(0.78, 0.78, lowerHeight, 64), trim, [0, lowerY, 0])
@@ -364,11 +478,21 @@ function buildTier(material, accent, trim, cable) {
 
 function buildGlass(material, accent, trim, cable) {
   addCable(1.67, cable)
-  addMesh(new THREE.SphereGeometry(0.36, 48, 32), accent, [0, 1.47, 0], [0, 0, 0], [1.15, 0.6, 1.15])
+  addMesh(
+    new THREE.SphereGeometry(0.36, 48, 32),
+    accent,
+    [0, 1.47, 0],
+    [0, 0, 0],
+    [1.15, 0.6, 1.15],
+  )
   // Fill the collar's central opening and seat it over the shade's mouth.
   const neckBottom = 0.93
   const neckTop = 1.43
-  addMesh(new THREE.CylinderGeometry(0.38, 0.38, neckTop - neckBottom, 48), accent, [0, (neckTop + neckBottom) / 2, 0])
+  addMesh(new THREE.CylinderGeometry(0.38, 0.38, neckTop - neckBottom, 48), accent, [
+    0,
+    (neckTop + neckBottom) / 2,
+    0,
+  ])
   addMesh(new THREE.TorusGeometry(0.48, 0.13, 22, 64), trim, [0, 1.08, 0], [Math.PI / 2, 0, 0])
 
   const points = [
@@ -397,7 +521,11 @@ function buildGlass(material, accent, trim, cable) {
   // The internal stem reaches the neck and ends just inside the bulb.
   const stemBottom = -0.4
   const stemTop = neckBottom + 0.03
-  addMesh(new THREE.CylinderGeometry(0.22, 0.22, stemTop - stemBottom, 32), accent, [0, (stemTop + stemBottom) / 2, 0])
+  addMesh(new THREE.CylinderGeometry(0.22, 0.22, stemTop - stemBottom, 32), accent, [
+    0,
+    (stemTop + stemBottom) / 2,
+    0,
+  ])
   addGlow(-0.72, 0.36)
 }
 
@@ -406,7 +534,7 @@ function disposeLamp(root = lampRoot) {
     const child = root.children[0]
     root.remove(child)
     child.geometry?.dispose()
-    if (Array.isArray(child.material)) child.material.forEach((item) => item.dispose())
+    if (Array.isArray(child.material)) child.material.forEach(item => item.dispose())
     else child.material?.dispose()
   }
   root.userData.paintTextures?.forEach(texture => texture.dispose())
@@ -420,7 +548,9 @@ function swapModel(id) {
   outgoing.scale.copy(lampRoot.scale)
   for (const part of [...lampRoot.children]) outgoing.add(part)
   // Keep the confirmed outgoing artwork alive until it leaves the viewer.
-  outgoing.userData.paintTextures = [...studio.paint.records.values()].flatMap(record => record.texture ? [record.texture] : [])
+  outgoing.userData.paintTextures = [...studio.paint.records.values()].flatMap(record =>
+    record.texture ? [record.texture] : [],
+  )
   studio.paint.reset({ disposeTextures: false })
   state.model = models.find(model => model.id === id)
   buildLamp({ reframe: false })
@@ -435,7 +565,10 @@ function buildLamp({ reframe = true } = {}) {
   lampLight = null
   lampBulb = null
   const finishes = state.shades.map((color, slot) => {
-    const finish = finishMaterial(color, slot === 1 && state.material.id === 'crystal' ? 'shine' : state.material.id)
+    const finish = finishMaterial(
+      color,
+      slot === 1 && state.material.id === 'crystal' ? 'shine' : state.material.id,
+    )
     finish.userData.colorSlot = slot
     return finish
   })
@@ -444,15 +577,21 @@ function buildLamp({ reframe = true } = {}) {
   studio.paint.bind()
 
   updateLight()
-  if (reframe) requestAnimationFrame(() => document.body.classList.contains('is-immersive') ? frameLampForImmersive() : frameLampForNormal())
+  if (reframe)
+    requestAnimationFrame(() =>
+      document.body.classList.contains('is-immersive')
+        ? frameLampForImmersive()
+        : frameLampForNormal(),
+    )
 }
 
 function applyLampIntensity() {
   const amount = state.lightOn ? lightReveal : 0
-  for (const root of lampRoots()) root.traverse(part => {
-    if (part.isPointLight) part.intensity = 7 * amount
-    if (part.userData.isBulb) part.material.emissiveIntensity = 2.2 * amount
-  })
+  for (const root of lampRoots())
+    root.traverse(part => {
+      if (part.isPointLight) part.intensity = 7 * amount
+      if (part.userData.isBulb) part.material.emissiveIntensity = 2.2 * amount
+    })
 }
 
 function updateLight() {
@@ -467,16 +606,21 @@ function updateLight() {
   // Studio illumination stays fixed; only the lamp's own light changes.
   // Only the dedicated bulb emits light. Painted parts retain their complete
   // finish, including base color and emissive settings, at every temperature.
-  for (const root of lampRoots()) root.traverse(part => {
-    if (part.isPointLight) part.color.copy(color)
-    if (part.userData.isBulb) part.material.emissive.copy(color)
-  })
+  for (const root of lampRoots())
+    root.traverse(part => {
+      if (part.isPointLight) part.color.copy(color)
+      if (part.userData.isBulb) part.material.emissive.copy(color)
+    })
   applyLampIntensity()
   document.querySelector('#light-toggle').classList.toggle('is-on', state.lightOn)
   document.querySelector('#light-toggle').setAttribute('aria-pressed', state.lightOn)
   document.querySelector('#light-label').textContent = state.lightOn ? 'Light on' : 'Light off'
-  document.querySelector('#light-toggle').setAttribute('aria-label', state.lightOn ? 'Turn lamp light off' : 'Turn lamp light on')
-  document.querySelector('#light-toggle').title = state.lightOn ? 'Light on — click to switch off' : 'Light off — click to switch on'
+  document
+    .querySelector('#light-toggle')
+    .setAttribute('aria-label', state.lightOn ? 'Turn lamp light off' : 'Turn lamp light on')
+  document.querySelector('#light-toggle').title = state.lightOn
+    ? 'Light on — click to switch off'
+    : 'Light off — click to switch on'
 }
 
 function updateSummary() {
@@ -485,38 +629,44 @@ function updateSummary() {
 }
 
 function selectGroup(selector, selected) {
-  document.querySelectorAll(selector).forEach((button) => {
+  document.querySelectorAll(selector).forEach(button => {
     const active = button === selected
     button.classList.toggle('is-selected', active)
     button.setAttribute('aria-checked', active)
   })
 }
 
-document.querySelectorAll('[data-model]').forEach((button) => {
+document.querySelectorAll('[data-model]').forEach(button => {
   button.addEventListener('click', async () => {
-    if (studio.confirming || (!modelTransition.active && state.model.id === button.dataset.model)) return
+    if (studio.confirming || (!modelTransition.active && state.model.id === button.dataset.model))
+      return
     studio.paint.finishStroke()
-    if (studio.paint.hasArtwork() && !await studio.confirm({
-      title: 'Switch lamp model?',
-      copy: 'Your drawing fits this lamp’s surfaces. Switching models will remove it and its undo history. Your colors, finish, and light settings will stay.',
-      action: 'Switch model',
-    })) return
+    if (
+      studio.paint.hasArtwork() &&
+      !(await studio.confirm({
+        title: 'Switch lamp model?',
+        copy: 'Your drawing fits this lamp’s surfaces. Switching models will remove it and its undo history. Your colors, finish, and light settings will stay.',
+        action: 'Switch model',
+      }))
+    )
+      return
     entrance.finish()
     modelTransition.request(button.dataset.model)
   })
 })
 
-document.querySelectorAll('[data-palette]').forEach((button) => {
+document.querySelectorAll('[data-palette]').forEach(button => {
   button.addEventListener('click', () => {
-    const palette = palettes.find((item) => item.id === button.dataset.palette)
+    const palette = palettes.find(item => item.id === button.dataset.palette)
     state.palette = palette.id
     state.shades = palette.id === 'mixed' ? mixedShades(state.shades) : [...palette.shades]
     // Recolor existing materials: keep geometry, finish, lighting, and camera intact.
-    for (const root of lampRoots()) root.traverse((part) => {
-      const slot = part.material?.userData.colorSlot
-      if (slot !== undefined) part.material.color.set(state.shades[slot])
-    })
-    document.querySelectorAll('[data-palette]').forEach((option) => {
+    for (const root of lampRoots())
+      root.traverse(part => {
+        const slot = part.material?.userData.colorSlot
+        if (slot !== undefined) part.material.color.set(state.shades[slot])
+      })
+    document.querySelectorAll('[data-palette]').forEach(option => {
       const selected = option.dataset.palette === state.palette
       option.classList.toggle('is-selected', selected)
       option.setAttribute('aria-pressed', selected)
@@ -525,23 +675,24 @@ document.querySelectorAll('[data-palette]').forEach((button) => {
           `linear-gradient(180deg, ${state.shades.map((shade, i) => `${shade} ${i * 25}% ${(i + 1) * 25}%`).join(', ')})`
       }
     })
-    document.querySelector('#color-status').textContent = palette.id === 'mixed'
-      ? `New mixed colors: ${state.shades.join(', ')}`
-      : `${palette.name} palette applied`
+    document.querySelector('#color-status').textContent =
+      palette.id === 'mixed'
+        ? `New mixed colors: ${state.shades.join(', ')}`
+        : `${palette.name} palette applied`
   })
 })
 
-document.querySelectorAll('[data-material]').forEach((button) => {
+document.querySelectorAll('[data-material]').forEach(button => {
   button.addEventListener('click', () => {
     modelTransition.finish()
-    state.material = materials.find((material) => material.id === button.dataset.material)
+    state.material = materials.find(material => material.id === button.dataset.material)
     selectGroup('[data-material]', button)
     buildLamp({ reframe: false })
     updateSummary()
   })
 })
 
-document.querySelector('#temperature').addEventListener('input', (event) => {
+document.querySelector('#temperature').addEventListener('input', event => {
   if (!state.lightOn) {
     event.target.value = state.temperature
     return
@@ -552,8 +703,18 @@ document.querySelector('#temperature').addEventListener('input', (event) => {
 
 // Keep the native range input's mouse, touch, and keyboard behavior. Its
 // gestures belong to the slider, never to the adjacent OrbitControls canvas.
-for (const type of ['pointerdown', 'pointermove', 'pointerup', 'pointercancel', 'touchstart', 'touchmove', 'touchend']) {
-  document.querySelector('#temperature').addEventListener(type, (event) => event.stopPropagation(), { passive: true })
+for (const type of [
+  'pointerdown',
+  'pointermove',
+  'pointerup',
+  'pointercancel',
+  'touchstart',
+  'touchmove',
+  'touchend',
+]) {
+  document
+    .querySelector('#temperature')
+    .addEventListener(type, event => event.stopPropagation(), { passive: true })
 }
 
 document.querySelector('#light-toggle').addEventListener('click', () => {
@@ -570,12 +731,19 @@ document.querySelector('#reset-view').addEventListener('click', () => {
   frameLampForNormal()
 })
 
-document.querySelectorAll('[data-background]').forEach(button => button.addEventListener('click', () => {
-  state.background = state.background === button.dataset.background ? 'cream' : button.dataset.background
-  const colors = { cream: '#FDFDFB', pink: '#FFD6DC', blue: '#C5D0FF', peach: '#F3C482' }
-  document.documentElement.style.setProperty('--scene-color', colors[state.background])
-  document.querySelectorAll('[data-background]').forEach(option => option.setAttribute('aria-pressed', option.dataset.background === state.background))
-}))
+document.querySelectorAll('[data-background]').forEach(button =>
+  button.addEventListener('click', () => {
+    state.background =
+      state.background === button.dataset.background ? 'cream' : button.dataset.background
+    const colors = { cream: '#FDFDFB', pink: '#FFD6DC', blue: '#C5D0FF', peach: '#F3C482' }
+    document.documentElement.style.setProperty('--scene-color', colors[state.background])
+    document
+      .querySelectorAll('[data-background]')
+      .forEach(option =>
+        option.setAttribute('aria-pressed', option.dataset.background === state.background),
+      )
+  }),
+)
 
 const immersiveTrigger = document.querySelector('#immersive-trigger')
 const immersiveExit = document.querySelector('#immersive-exit')
@@ -628,8 +796,9 @@ function toggleImmersivePopup(id) {
   if (wasOpen) return
   activePanel = id
   immersiveDock.classList.toggle('has-pattern', id === 'pattern')
-  document.querySelector('#immersive-popup-title').textContent =
-    immersiveCategories.find((category) => category.id === id).label
+  document.querySelector('#immersive-popup-title').textContent = immersiveCategories.find(
+    category => category.id === id,
+  ).label
   popupContent.append(panelControls[id])
   if (id === 'pattern') {
     studio.panel.hidden = false
@@ -640,8 +809,11 @@ function toggleImmersivePopup(id) {
   immersivePopup.classList.toggle('is-pattern-popup', id === 'pattern')
   document.querySelector(`[data-panel="${id}"]`).setAttribute('aria-expanded', 'true')
   layoutImmersiveView()
-  const selected = popupContent.querySelector('[data-paint-mode][aria-pressed="true"]') || popupContent.querySelector('.is-selected') ||
-    popupContent.querySelector('input:not(:disabled), button') || lightToggle
+  const selected =
+    popupContent.querySelector('[data-paint-mode][aria-pressed="true"]') ||
+    popupContent.querySelector('.is-selected') ||
+    popupContent.querySelector('input:not(:disabled), button') ||
+    lightToggle
   selected.focus({ preventScroll: true })
 }
 
@@ -657,8 +829,8 @@ function closePatternStudio() {
   }
 }
 
-document.querySelectorAll('.logo').forEach((logo) => {
-  logo.addEventListener('click', (event) => {
+document.querySelectorAll('.logo').forEach(logo => {
+  logo.addEventListener('click', event => {
     event.preventDefault()
     // Return without rebuilding the lamp or discarding its painted artwork.
     normalStudioOpen = false
@@ -687,8 +859,10 @@ function layoutImmersiveView() {
   const viewerBounds = document.querySelector('.viewer').getBoundingClientRect()
   const dockBounds = immersiveDock.getBoundingClientRect()
   // Short landscape screens put the dock beside the scene to retain lamp size.
-  if (window.matchMedia('(max-height: 500px) and (min-aspect-ratio: 3/2)').matches ||
-      (activePanel === 'pattern' && window.matchMedia('(min-width: 900px)').matches)) {
+  if (
+    window.matchMedia('(max-height: 500px) and (min-aspect-ratio: 3/2)').matches ||
+    (activePanel === 'pattern' && window.matchMedia('(min-width: 900px)').matches)
+  ) {
     canvasWrap.style.right = `${viewerBounds.right - dockBounds.left + 24}px`
     canvasWrap.style.bottom = '24px'
   } else {
@@ -751,9 +925,11 @@ function fitLampForImmersive() {
       for (const z of [bounds.min.z, bounds.max.z]) {
         const corner = new THREE.Vector3(x, y, z).sub(center)
         const depth = corner.dot(viewingDirection)
-        distance = Math.max(distance,
-          depth + Math.abs(corner.dot(up)) * 1.16 / verticalSlope,
-          depth + Math.abs(corner.dot(right)) * 1.16 / horizontalSlope)
+        distance = Math.max(
+          distance,
+          depth + (Math.abs(corner.dot(up)) * 1.16) / verticalSlope,
+          depth + (Math.abs(corner.dot(right)) * 1.16) / horizontalSlope,
+        )
       }
     }
   }
@@ -770,7 +946,13 @@ function frameLampForNormal() {
 }
 
 function limitNormalZoom() {
-  if (!normalCableTop || document.body.classList.contains('is-immersive') || entrance.active || modelTransition.active) return
+  if (
+    !normalCableTop ||
+    document.body.classList.contains('is-immersive') ||
+    entrance.active ||
+    modelTransition.active
+  )
+    return
   controls.maxDistance = suspensionZoomLimit(camera, controls.target, normalCableTop)
   const offset = camera.position.clone().sub(controls.target)
   if (offset.length() > controls.maxDistance) {
@@ -786,7 +968,9 @@ function fitLampForNormal() {
   lampRoot.updateMatrixWorld(true)
   // In the reference, the suspension cord continues to the circle's upper
   // edge. Fit the complete lamp body and let the existing cord hang from it.
-  const parts = lampRoot.children.filter(mesh => mesh.geometry && mesh.material?.userData.colorSlot !== 3)
+  const parts = lampRoot.children.filter(
+    mesh => mesh.geometry && mesh.material?.userData.colorSlot !== 3,
+  )
   const bounds = new THREE.Box3()
   parts.forEach(mesh => bounds.expandByObject(mesh))
   bounds.min.divideScalar(lampRoot.scale.x)
@@ -807,19 +991,28 @@ function fitLampForNormal() {
     const positions = mesh.geometry?.attributes.position
     if (!positions) continue
     for (let i = 0; i < positions.count; i++) {
-      point.fromBufferAttribute(positions, i).applyMatrix4(mesh.matrixWorld).divideScalar(lampRoot.scale.x).sub(center)
+      point
+        .fromBufferAttribute(positions, i)
+        .applyMatrix4(mesh.matrixWorld)
+        .divideScalar(lampRoot.scale.x)
+        .sub(center)
       const vertical = point.dot(up)
-      distance = Math.max(distance, point.dot(direction) + Math.max(
-        Math.abs(vertical) / (slope * (vertical > 0 ? .71 : .68)),
-        Math.abs(point.dot(right)) / (slope * camera.aspect * .84),
-      ))
+      distance = Math.max(
+        distance,
+        point.dot(direction) +
+          Math.max(
+            Math.abs(vertical) / (slope * (vertical > 0 ? 0.71 : 0.68)),
+            Math.abs(point.dot(right)) / (slope * camera.aspect * 0.84),
+          ),
+      )
     }
   }
   controls.target.copy(center)
   controls.minDistance = distance * 0.55
   camera.position.copy(center).addScaledVector(direction, distance)
   const cableBounds = new THREE.Box3()
-  lampRoot.children.filter(mesh => mesh.geometry && mesh.material?.userData.colorSlot === 3)
+  lampRoot.children
+    .filter(mesh => mesh.geometry && mesh.material?.userData.colorSlot === 3)
     .forEach(mesh => cableBounds.expandByObject(mesh))
   normalCableTop = cableBounds.getCenter(new THREE.Vector3())
   normalCableTop.y = cableBounds.max.y
@@ -864,20 +1057,23 @@ function exitImmersiveView() {
 
 immersiveTrigger.addEventListener('click', enterImmersiveView)
 immersiveExit.addEventListener('click', exitImmersiveView)
-document.querySelectorAll('[data-panel]').forEach((button) => {
+document.querySelectorAll('[data-panel]').forEach(button => {
   button.addEventListener('click', () => toggleImmersivePopup(button.dataset.panel))
 })
-document.querySelector('#close-immersive-popup').addEventListener('click', () => closeImmersivePopup())
-document.addEventListener('pointerdown', (event) => {
+document
+  .querySelector('#close-immersive-popup')
+  .addEventListener('click', () => closeImmersivePopup())
+document.addEventListener('pointerdown', event => {
   if (studio.confirming) return
   if (activePanel === 'pattern' && canvasWrap.contains(event.target)) return
   if (activePanel && !immersiveDock.contains(event.target)) closeImmersivePopup(false)
 })
-document.addEventListener('keydown', (event) => {
+document.addEventListener('keydown', event => {
   if (event.key !== 'Escape') return
   if (studio.confirming) return
   if (activePanel) closeImmersivePopup()
-  else if (normalStudioOpen && !document.body.classList.contains('is-immersive')) closePatternStudio()
+  else if (normalStudioOpen && !document.body.classList.contains('is-immersive'))
+    closePatternStudio()
   else exitImmersiveView()
 })
 
@@ -897,8 +1093,12 @@ function resize(preserveView = false) {
 }
 
 window.addEventListener('resize', () => {
-  if (normalStudioOpen && !document.body.classList.contains('is-immersive') &&
-      window.matchMedia('(max-width: 1200px)').matches) enterImmersiveView()
+  if (
+    normalStudioOpen &&
+    !document.body.classList.contains('is-immersive') &&
+    window.matchMedia('(max-width: 1200px)').matches
+  )
+    enterImmersiveView()
   if (document.body.classList.contains('is-immersive')) layoutImmersiveView()
   else resize()
 })
@@ -911,12 +1111,14 @@ new ResizeObserver(layoutImmersiveView).observe(immersiveDock)
 let previousFrameTime
 function animate(time = performance.now()) {
   requestAnimationFrame(animate)
-  const delta = previousFrameTime === undefined ? 0 : Math.min((time - previousFrameTime) / 1000, 0.1)
+  const delta =
+    previousFrameTime === undefined ? 0 : Math.min((time - previousFrameTime) / 1000, 0.1)
   previousFrameTime = time
   // Keep the surface still in Draw mode; resume automatically in Rotate mode.
   entrance.update(time)
   modelTransition.update(time)
-  controls.autoRotate = controls.enabled && !entrance.active && !modelTransition.active && !motionPreference.matches
+  controls.autoRotate =
+    controls.enabled && !entrance.active && !modelTransition.active && !motionPreference.matches
   if (controls.enabled) controls.update(delta)
   renderer.render(scene, camera)
 }

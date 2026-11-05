@@ -5,8 +5,14 @@ const ease = t => t * t * (3 - 2 * t)
 // Reference: https://ca.pinterest.com/pin/286893438754010068/
 // The reference keeps objects solid and upright as they travel around a
 // horizontal carousel. Move the root only; never scale or deform its parts.
-export function applyCarouselPose(root, rest, { right, towardCamera, distance, depth, direction }, amount) {
-  root.position.copy(rest.position)
+export function applyCarouselPose(
+  root,
+  rest,
+  { right, towardCamera, distance, depth, direction },
+  amount,
+) {
+  root.position
+    .copy(rest.position)
     .addScaledVector(right, direction * distance * amount)
     .addScaledVector(towardCamera, -depth * Math.abs(amount))
   root.rotation.copy(rest.rotation)
@@ -15,16 +21,37 @@ export function applyCarouselPose(root, rest, { right, towardCamera, distance, d
 }
 
 function pose(root) {
-  return { position: root.position.clone(), rotation: root.rotation.clone(), scale: root.scale.clone() }
+  return {
+    position: root.position.clone(),
+    rotation: root.rotation.clone(),
+    scale: root.scale.clone(),
+  }
 }
 
-export function createModelTransition({ root, scene, camera, controls, motionPreference, currentId, modelIds, swap, frame, dispose, onLock }) {
+export function createModelTransition({
+  root,
+  scene,
+  camera,
+  controls,
+  motionPreference,
+  currentId,
+  modelIds,
+  swap,
+  frame,
+  dispose,
+  onLock,
+}) {
   let running = null
   let queued = null
   const duration = 900
 
   function view() {
-    return { position: camera.position.clone(), target: controls.target.clone(), min: controls.minDistance, max: controls.maxDistance }
+    return {
+      position: camera.position.clone(),
+      target: controls.target.clone(),
+      min: controls.minDistance,
+      max: controls.maxDistance,
+    }
   }
 
   function blendView(from, to, amount) {
@@ -55,13 +82,19 @@ export function createModelTransition({ root, scene, camera, controls, motionPre
 
     const towardCamera = from.position.clone().sub(from.target).normalize()
     const right = new THREE.Vector3().crossVectors(camera.up, towardCamera).normalize()
-    const sizes = [root, outgoing].map(object => new THREE.Box3().setFromObject(object).getSize(new THREE.Vector3()))
+    const sizes = [root, outgoing].map(object =>
+      new THREE.Box3().setFromObject(object).getSize(new THREE.Vector3()),
+    )
     const radius = Math.max(...sizes.map(size => Math.max(size.x, size.z) / 2))
-    const halfWidth = Math.max(from.position.distanceTo(from.target), to.position.distanceTo(to.target))
-      * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.aspect
+    const halfWidth =
+      Math.max(from.position.distanceTo(from.target), to.position.distanceTo(to.target)) *
+      Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) *
+      camera.aspect
     const distance = Math.max(halfWidth + radius * 1.5, radius * 2.6)
     const path = {
-      right, towardCamera, direction,
+      right,
+      towardCamera,
+      direction,
       distance,
       // Limit the inward curve so wide immersive views never reverse travel.
       spacing: Math.max(radius * 2.12, distance * 0.6),
@@ -96,10 +129,15 @@ export function createModelTransition({ root, scene, camera, controls, motionPre
   })
 
   return {
-    get active() { return running !== null },
-    get outgoing() { return running?.outgoing ?? null },
+    get active() {
+      return running !== null
+    },
+    get outgoing() {
+      return running?.outgoing ?? null
+    },
     request(id) {
-      if (running) queued = id // Latest choice wins; never accumulate a backlog.
+      if (running)
+        queued = id // Latest choice wins; never accumulate a backlog.
       else begin(id)
     },
     update(time) {
@@ -110,7 +148,10 @@ export function createModelTransition({ root, scene, camera, controls, motionPre
       const { outgoing, rest, oldRest, path, from, to } = running
       // Bring the pair closer through the center of the carousel, keeping a
       // physical gap. At either end, travel fully beyond the viewer's edges.
-      const movingPath = { ...path, distance: THREE.MathUtils.lerp(path.distance, path.spacing, Math.sin(Math.PI * amount)) }
+      const movingPath = {
+        ...path,
+        distance: THREE.MathUtils.lerp(path.distance, path.spacing, Math.sin(Math.PI * amount)),
+      }
       applyCarouselPose(outgoing, oldRest, movingPath, -amount)
       applyCarouselPose(root, rest, movingPath, 1 - amount)
       blendView(from, to, amount)
@@ -127,7 +168,9 @@ export function createModelTransition({ root, scene, camera, controls, motionPre
       const animated = pose(root)
       applyCarouselPose(root, running.rest, running.path, 0)
       root.updateMatrixWorld(true)
-      try { return callback() } finally {
+      try {
+        return callback()
+      } finally {
         root.position.copy(animated.position)
         root.rotation.copy(animated.rotation)
         root.scale.copy(animated.scale)

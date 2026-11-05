@@ -1,8 +1,11 @@
-const animationComplete = element => Promise.all(element.getAnimations({ subtree: true }).map(animation =>
-  animation.finished.catch(error => {
-    if (error.name !== 'AbortError') throw error // Reduced motion cancels CSS animations.
-  }),
-))
+const animationComplete = element =>
+  Promise.all(
+    element.getAnimations({ subtree: true }).map(animation =>
+      animation.finished.catch(error => {
+        if (error.name !== 'AbortError') throw error // Reduced motion cancels CSS animations.
+      }),
+    ),
+  )
 
 export function createBubbleLoader({
   screen = document.querySelector('#bubble-loader'),

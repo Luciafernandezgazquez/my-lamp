@@ -8,14 +8,27 @@ const smooth = value => {
 // travel together; the bulb and its point light share the same path.
 const assemblyMotion = [
   { offsetY: -0.06, delay: 80 }, // shade
-  { offsetY: 0.26, delay: 0 },   // collar
+  { offsetY: 0.26, delay: 0 }, // collar
   { offsetY: -0.3, delay: 140 }, // trim / underside
-  { offsetY: 0.3, delay: 0 },   // cable
+  { offsetY: 0.3, delay: 0 }, // cable
 ]
 const bulbMotion = { offsetY: -0.58, delay: 250 }
-const timing = { fade: 850, arrival: 1700, assemblyStart: 950, assemblyDuration: 1450, lightStart: 2650, duration: 3600 }
+const timing = {
+  fade: 850,
+  arrival: 1700,
+  assemblyStart: 950,
+  assemblyDuration: 1450,
+  lightStart: 2650,
+  duration: 3600,
+}
 
-export function createEntranceAnimation({ root, canvas, motionPreference, onLock, onLight = () => {} }) {
+export function createEntranceAnimation({
+  root,
+  canvas,
+  motionPreference,
+  onLock,
+  onLight = () => {},
+}) {
   const restScale = root.scale.clone()
   const restRotation = root.rotation.clone()
   const originalOpacity = canvas.style.opacity
@@ -69,14 +82,18 @@ export function createEntranceAnimation({ root, canvas, motionPreference, onLock
   })
 
   return {
-    get active() { return active },
+    get active() {
+      return active
+    },
     start() {
       if (started) return
       started = true
       if (motionPreference.matches) return
       parts = root.children.flatMap(object => {
-        const motion = object.userData.isBulb || object.isPointLight
-          ? bulbMotion : assemblyMotion[object.material?.userData.colorSlot]
+        const motion =
+          object.userData.isBulb || object.isPointLight
+            ? bulbMotion
+            : assemblyMotion[object.material?.userData.colorSlot]
         return motion ? [{ object, position: object.position.clone(), ...motion }] : []
       })
       active = true

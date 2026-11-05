@@ -28,7 +28,7 @@ Git checkpoint **`90f270a`** preserves the working configurator and supplied ref
 
 ### Requirements
 
-- Node.js **22.12 or newer** and npm. The installed Vite version also supports Node.js 20.19+ within the 20.x release line.
+- Node.js **24 or newer** and npm are recommended. The build and lint tools also support Node.js 22.13+ within the 22.x line and 20.19+ within the 20.x line.
 - A browser with JavaScript and WebGL 2 support, with graphics acceleration available.
 
 From the parent `Projects` directory:
@@ -47,14 +47,17 @@ No API keys, environment variables, database, or external 3D model downloads are
 
 Run these commands from the project root:
 
-| Command | Purpose |
-| --- | --- |
-| `npm ci` | Install the dependency versions recorded in `package-lock.json`. |
-| `npm run dev` | Start the development server with live updates. |
-| `npm run build` | Generate the production website in `dist/`. |
-| `npm test` | Check bubble-loader handoff, entrance and model-transition timing, pose restoration, rapid selections, reduced motion, and cable zoom-limit mathematics. |
-| `npm run preview` | Serve an existing production build locally, normally on port 4173. |
-| `npm run dev -- --host 0.0.0.0` | Make the development server reachable from another device on the same network. |
+| Command                         | Purpose                                                                                                                                                  |
+| ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `npm ci`                        | Install the dependency versions recorded in `package-lock.json`.                                                                                         |
+| `npm run dev`                   | Start the development server with live updates.                                                                                                          |
+| `npm run lint`                  | Check JavaScript with ESLint; warnings also fail the check.                                                                                              |
+| `npm run format`                | Apply Prettier formatting to maintained source and documentation.                                                                                        |
+| `npm run format:check`          | Check formatting without changing files.                                                                                                                 |
+| `npm run build`                 | Generate the production website in `dist/`.                                                                                                              |
+| `npm test`                      | Check bubble-loader handoff, entrance and model-transition timing, pose restoration, rapid selections, reduced motion, and cable zoom-limit mathematics. |
+| `npm run preview`               | Serve an existing production build locally, normally on port 4173.                                                                                       |
+| `npm run dev -- --host 0.0.0.0` | Make the development server reachable from another device on the same network.                                                                           |
 
 For phone testing, use your computer's local network address and the port printed by Vite. The phone and computer must be able to reach one another on that network.
 
@@ -134,13 +137,13 @@ Artwork is held in memory for the current page session. Reloading clears it; the
 
 The four shades are assigned to the model's primary body, accents, trim, and cable. The exact geometry assigned to each role varies by model. Swatches and lamp colors share the same palette definitions in [src/palettes.js](src/palettes.js).
 
-| Palette | Primary | Accent | Trim | Cable |
-| --- | --- | --- | --- | --- |
-| Pink | `#EDB5C5` | `#D69BAE` | `#F4CCD7` | `#FBE5EA` |
-| Yellow | `#F2E3AB` | `#D9C78F` | `#E8CEAA` | `#FCF4D9` |
-| Blue | `#BEC5E7` | `#9DA8CE` | `#D5D9EF` | `#EEF0FA` |
-| White | `#FFFFFF` | `#FFFFFF` | `#FFFFFF` | `#FFFFFF` |
-| Black | `#000000` | `#000000` | `#000000` | `#000000` |
+| Palette | Primary   | Accent    | Trim      | Cable     |
+| ------- | --------- | --------- | --------- | --------- |
+| Pink    | `#EDB5C5` | `#D69BAE` | `#F4CCD7` | `#FBE5EA` |
+| Yellow  | `#F2E3AB` | `#D9C78F` | `#E8CEAA` | `#FCF4D9` |
+| Blue    | `#BEC5E7` | `#9DA8CE` | `#D5D9EF` | `#EEF0FA` |
+| White   | `#FFFFFF` | `#FFFFFF` | `#FFFFFF` | `#FFFFFF` |
+| Black   | `#000000` | `#000000` | `#000000` | `#000000` |
 
 **Mixed colors** generates four distinct shades from the Pink, Yellow, and Blue families. Each click includes all three families, changes every part's assigned color, and changes the primary color family from the previous combination. Its swatch updates to show the generated colors. Color changes preserve the selected model, finish, lighting, and camera.
 
@@ -150,11 +153,11 @@ These hex values describe the base material colors. Lighting, reflections, and t
 
 The preview swatches use the supplied images in this order: MATERIAL_1 → Matte (`material-matte.png`), MATERIAL_2 → Crystal (`material-crystal.png`), MATERIAL_3 → Ceramic (`material-ceramic.png`). The PNGs live in `public/assets/`; CSS compensates for their transparent margins. These are UI previews only; material rendering and the initial Ceramic selection are unchanged.
 
-| Finish | Appearance |
-| --- | --- |
+| Finish  | Appearance                                                                 |
+| ------- | -------------------------------------------------------------------------- |
 | Ceramic | Fine procedural grain, shallow imperfections, and a soft reflective glaze. |
-| Crystal | Transparent, light-transmitting material with glossy reflections. |
-| Matte | A rough surface with subdued highlights. |
+| Crystal | Transparent, light-transmitting material with glossy reflections.          |
+| Matte   | A rough surface with subdued highlights.                                   |
 
 Ceramic uses object-space surface detail to avoid UV seams and keep the grain attached to the lamp during rotation. Scaled geometry keeps the grain consistent across differently shaped parts; subpixel detail fades at a distance to reduce shimmer. A shared, neutral studio environment supplies broad reflections. The reference photographs guide the finish and are not applied as color textures.
 
@@ -204,36 +207,36 @@ The app uses **vanilla JavaScript ES modules**, **CSS**, **Vite 8**, and **Three
 
 [plan.md](plan.md) records the original design direction: sculptural shapes, playful colors, a clean interface, and warm light from the left. The implementation includes later refinements such as the pastel palettes and immersive controls; the original brief's palette is not the current palette source.
 
-| Reference | Purpose |
-| --- | --- |
-| [LAYOUT.jpg](public/assets/LAYOUT.jpg) | Viewer and configuration-panel layout. |
-| [LAYOUT_2.jpg](public/assets/LAYOUT_2.jpg) | Desktop layout, typography, buttons, and circular backdrop; material thumbnails use the newer supplied PNGs. |
-| [LAMPS.png](public/assets/LAMPS.png) | Sculptural lamp silhouettes. |
-| [LAYOUT-1.jpg](public/assets/LAYOUT-1.jpg) | Original color direction. |
-| [LIGHTING.jpg](public/assets/LIGHTING.jpg) | Warm, soft lighting from the left. |
-| [LOGO.jpg](public/assets/LOGO.jpg) | Stap logo direction. |
-| [MATERIALS.jpg](public/assets/MATERIALS.jpg) | Finish options. |
-| [TYPOGRAPHY.jpg](public/assets/TYPOGRAPHY.jpg) | Typography direction. |
-| [ceramic-reference-01.jpg](public/assets/ceramic-reference-01.jpg) | Surface texture and fine grain. |
-| [ceramic-reference-02.jpg](public/assets/ceramic-reference-02.jpg) | Glaze and soft reflections. |
-| [ceramic-reference-03.jpg](public/assets/ceramic-reference-03.jpg) | Subtle surface imperfections. |
+| Reference                                                          | Purpose                                                                                                      |
+| ------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------ |
+| [LAYOUT.jpg](public/assets/LAYOUT.jpg)                             | Viewer and configuration-panel layout.                                                                       |
+| [LAYOUT_2.jpg](public/assets/LAYOUT_2.jpg)                         | Desktop layout, typography, buttons, and circular backdrop; material thumbnails use the newer supplied PNGs. |
+| [LAMPS.png](public/assets/LAMPS.png)                               | Sculptural lamp silhouettes.                                                                                 |
+| [LAYOUT-1.jpg](public/assets/LAYOUT-1.jpg)                         | Original color direction.                                                                                    |
+| [LIGHTING.jpg](public/assets/LIGHTING.jpg)                         | Warm, soft lighting from the left.                                                                           |
+| [LOGO.jpg](public/assets/LOGO.jpg)                                 | Stap logo direction.                                                                                         |
+| [MATERIALS.jpg](public/assets/MATERIALS.jpg)                       | Finish options.                                                                                              |
+| [TYPOGRAPHY.jpg](public/assets/TYPOGRAPHY.jpg)                     | Typography direction.                                                                                        |
+| [ceramic-reference-01.jpg](public/assets/ceramic-reference-01.jpg) | Surface texture and fine grain.                                                                              |
+| [ceramic-reference-02.jpg](public/assets/ceramic-reference-02.jpg) | Glaze and soft reflections.                                                                                  |
+| [ceramic-reference-03.jpg](public/assets/ceramic-reference-03.jpg) | Subtle surface imperfections.                                                                                |
 
 The current interface uses **Arial** to match the supplied layout's letterforms and spacing. The logo uses locally installed Neue Haas Display Roman/Light through `@font-face` local sources, with Helvetica Neue, Helvetica, and Arial fallbacks. No font binaries or third-party font requests are bundled. Logo metrics may vary on machines without those local fonts.
 
 ## Making changes
 
-| Change | Where to edit |
-| --- | --- |
-| Default selections | The `state` object in `src/main.js`. |
-| Model definitions | The `models` array, model builders, and model icons in `src/main.js`; icon styles in `src/style.css`. |
-| Palettes and Mixed behavior | `src/palettes.js`. Keep four shades per palette to preserve part assignments. |
-| Material finishes | `finishMaterial()` and the PIP model treatment in `src/main.js`. |
-| Ceramic grain, glaze, and reflections | `src/ceramic-material.js`. |
-| Drawing brushes, projection, and history | `src/surface-paint.js`; controls in `src/pattern-studio.js` and `src/pattern-studio.css`. |
-| Light temperature and displayed Kelvin values | `src/light-temperature.js`; keep the slider gradients in `src/style.css` consistent with its endpoint colors. |
-| Current layout and responsive behavior | `src/layout.css`, loaded after the existing component styles; immersive placement and camera framing functions in `src/main.js`. |
-| Headline, numbered sections, and background choices | The page template and background handler in `src/main.js`. |
-| Page title and description | `index.html`. |
+| Change                                              | Where to edit                                                                                                                    |
+| --------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
+| Default selections                                  | The `state` object in `src/main.js`.                                                                                             |
+| Model definitions                                   | The `models` array, model builders, and model icons in `src/main.js`; icon styles in `src/style.css`.                            |
+| Palettes and Mixed behavior                         | `src/palettes.js`. Keep four shades per palette to preserve part assignments.                                                    |
+| Material finishes                                   | `finishMaterial()` and the PIP model treatment in `src/main.js`.                                                                 |
+| Ceramic grain, glaze, and reflections               | `src/ceramic-material.js`.                                                                                                       |
+| Drawing brushes, projection, and history            | `src/surface-paint.js`; controls in `src/pattern-studio.js` and `src/pattern-studio.css`.                                        |
+| Light temperature and displayed Kelvin values       | `src/light-temperature.js`; keep the slider gradients in `src/style.css` consistent with its endpoint colors.                    |
+| Current layout and responsive behavior              | `src/layout.css`, loaded after the existing component styles; immersive placement and camera framing functions in `src/main.js`. |
+| Headline, numbered sections, and background choices | The page template and background handler in `src/main.js`.                                                                       |
+| Page title and description                          | `index.html`.                                                                                                                    |
 
 Customizable materials carry `userData.colorSlot`, which maps them to one of the four palette shades. Keep the bulb material separate from painted surfaces when adding models or finishes. Immersive popups move the existing controls between layouts rather than duplicating their state or event handlers.
 
@@ -260,7 +263,7 @@ Files under `public/`, including the moodboard references, are copied into the b
 
 ## Verification and troubleshooting
 
-Run `npm test` for loading, animation lifecycle, and camera-math checks, and `npm run build` for the production build. No lint script is configured. After a functional or visual change, also check the following in a browser:
+Run `npm run lint` and `npm run format:check` for code-quality checks, `npm test` for loading, animation lifecycle, and camera-math checks, and `npm run build` for the production build. ESLint uses recommended JavaScript rules with browser globals for `src/` and Node.js globals for tests and configuration. Prettier preserves the project's single quotes and omitted semicolons, and leaves embedded template code alone. Dependencies, build output, coverage, imported assets, and historical review artifacts are excluded; the generated package lockfile is also excluded from formatting. After a functional or visual change, also check the following in a browser:
 
 - The entrance runs once in approximately 3.6 seconds, restores the exact assembled pose, and releases rotation/painting. Check reduced motion, resizing during the reveal, and changing selections before it completes.
 - Model transitions travel in both directions, settle in 0.9 seconds, preserve the final pose, and handle rapid selections without extra lamps. Check temperature/palette changes during motion, artwork confirmation, reduced motion, and drawing after completion.
@@ -278,14 +281,14 @@ Run `npm test` for loading, animation lifecycle, and camera-math checks, and `np
 - Artwork stays on the decorated surface without appearing on opposite sides or cylinder caps.
 - Undo/redo, erasing, clear confirmation, and model-switch confirmation work; palette, material, and view changes retain artwork.
 
-| Issue | What to check |
-| --- | --- |
-| Dependency installation or Vite startup fails | Check `node --version` against the requirements above, and run commands from `my-product`. |
-| The viewer is blank | Use the Vite server or a hosted build rather than opening `index.html` directly. Check WebGL 2 availability, graphics acceleration, and the browser console. |
-| The temperature slider is disabled | Switch the lamp's light on. In immersive view, the switch is in the Light Temperature popup. |
-| Typography differs between machines | The named font is not bundled; a fallback font may be in use. |
-| The build reports a large JavaScript chunk | Three.js is included in the application bundle. A chunk-size warning alone does not mean the build failed. |
-| Selections disappear after a reload | Configuration is currently stored only in page memory, not local storage or a database. |
+| Issue                                         | What to check                                                                                                                                                |
+| --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Dependency installation or Vite startup fails | Check `node --version` against the requirements above, and run commands from `my-product`.                                                                   |
+| The viewer is blank                           | Use the Vite server or a hosted build rather than opening `index.html` directly. Check WebGL 2 availability, graphics acceleration, and the browser console. |
+| The temperature slider is disabled            | Switch the lamp's light on. In immersive view, the switch is in the Light Temperature popup.                                                                 |
+| Typography differs between machines           | The named font is not bundled; a fallback font may be in use.                                                                                                |
+| The build reports a large JavaScript chunk    | Three.js is included in the application bundle. A chunk-size warning alone does not mean the build failed.                                                   |
+| Selections disappear after a reload           | Configuration is currently stored only in page memory, not local storage or a database.                                                                      |
 
 ## License
 

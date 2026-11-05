@@ -24,7 +24,13 @@ function fixture(reducedMotion = false) {
   motionPreference.matches = reducedMotion
   const locks = []
   const lights = []
-  const entrance = createEntranceAnimation({ root, canvas, motionPreference, onLock: locked => locks.push(locked), onLight: amount => lights.push(amount) })
+  const entrance = createEntranceAnimation({
+    root,
+    canvas,
+    motionPreference,
+    onLock: locked => locks.push(locked),
+    onLight: amount => lights.push(amount),
+  })
   return { root, canvas, motionPreference, locks, lights, entrance }
 }
 
@@ -55,11 +61,15 @@ test('camera measurement sees the rest pose and always restores the animated pos
   entrance.start()
   const scale = root.scale.clone()
   const rotation = root.rotation.clone()
-  assert.throws(() => entrance.withRestPose(() => {
-    assert.equal(root.scale.x, 1)
-    assert.equal(root.rotation.y, -0.32)
-    throw new Error('measurement failed')
-  }), /measurement failed/)
+  assert.throws(
+    () =>
+      entrance.withRestPose(() => {
+        assert.equal(root.scale.x, 1)
+        assert.equal(root.rotation.y, -0.32)
+        throw new Error('measurement failed')
+      }),
+    /measurement failed/,
+  )
   assert.deepEqual(root.scale, scale)
   assert.deepEqual(root.rotation.toArray(), rotation.toArray())
 })
@@ -97,15 +107,35 @@ test('assembly restores every component exactly without changing geometry or loc
   const scales = root.children.map(part => part.scale.toArray())
   entrance.start()
   entrance.update(0)
-  assert.notDeepEqual(root.children.map(part => part.position.toArray()), positions)
+  assert.notDeepEqual(
+    root.children.map(part => part.position.toArray()),
+    positions,
+  )
   entrance.update(1500)
-  entrance.withRestPose(() => assert.deepEqual(root.children.map(part => part.position.toArray()), positions))
+  entrance.withRestPose(() =>
+    assert.deepEqual(
+      root.children.map(part => part.position.toArray()),
+      positions,
+    ),
+  )
   entrance.update(2650)
-  assert.deepEqual(root.children.map(part => part.position.toArray()), positions)
+  assert.deepEqual(
+    root.children.map(part => part.position.toArray()),
+    positions,
+  )
   entrance.finish()
-  assert.deepEqual(root.children.map(part => part.position.toArray()), positions)
-  assert.deepEqual(root.children.map(part => part.geometry?.attributes.position.array), geometry)
-  assert.deepEqual(root.children.map(part => part.scale.toArray()), scales)
+  assert.deepEqual(
+    root.children.map(part => part.position.toArray()),
+    positions,
+  )
+  assert.deepEqual(
+    root.children.map(part => part.geometry?.attributes.position.array),
+    geometry,
+  )
+  assert.deepEqual(
+    root.children.map(part => part.scale.toArray()),
+    scales,
+  )
 })
 
 test('light rises only after assembly and reaches full intensity at 3.6 seconds', () => {

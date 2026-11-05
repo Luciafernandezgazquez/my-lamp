@@ -15,15 +15,26 @@ export const palettes = [
 // Alternate the main shade's color family, not just a similar shade within it.
 // Every slot changes and all three color families appear in every combination.
 export function mixedShades(previous = [], random = Math.random) {
-  const families = palettes.slice(0, 3).map((palette) => palette.shades)
-  const orders = [[0, 1, 2], [0, 2, 1], [1, 0, 2], [1, 2, 0], [2, 0, 1], [2, 1, 0]]
-    .filter((order) => !families[order[0]].includes(previous[0]))
-  const pick = (values) => values[Math.floor(random() * values.length)]
+  const families = palettes.slice(0, 3).map(palette => palette.shades)
+  const orders = [
+    [0, 1, 2],
+    [0, 2, 1],
+    [1, 0, 2],
+    [1, 2, 0],
+    [2, 0, 1],
+    [2, 1, 0],
+  ].filter(order => !families[order[0]].includes(previous[0]))
+  const pick = values => values[Math.floor(random() * values.length)]
   const order = pick(orders)
   const result = []
   for (let slot = 0; slot < 4; slot++) {
-    result.push(pick(families[order[slot % 3]].filter((color) =>
-      color !== previous[slot] && !result.includes(color))))
+    result.push(
+      pick(
+        families[order[slot % 3]].filter(
+          color => color !== previous[slot] && !result.includes(color),
+        ),
+      ),
+    )
   }
   return result
 }

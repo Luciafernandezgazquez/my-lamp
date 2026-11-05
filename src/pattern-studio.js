@@ -41,7 +41,9 @@ export function createPatternStudio({ canvas, camera, controls, root, onClose })
     document.querySelector('#studio-confirm-action').textContent = action
     dialog.returnValue = 'cancel'
     return new Promise(resolve => {
-      dialog.addEventListener('close', () => resolve(dialog.returnValue === 'confirm'), { once: true })
+      dialog.addEventListener('close', () => resolve(dialog.returnValue === 'confirm'), {
+        once: true,
+      })
       dialog.showModal()
     })
   }
@@ -52,26 +54,46 @@ export function createPatternStudio({ canvas, camera, controls, root, onClose })
     panel.querySelector('#drawing-clear').disabled = !paint.hasArtwork()
   }
   panel.querySelector('#studio-done').addEventListener('click', onClose)
-  panel.querySelectorAll('[data-paint-mode]').forEach(button => button.addEventListener('click', () => {
-    paint.setMode(button.dataset.paintMode)
-    panel.querySelectorAll('[data-paint-mode]').forEach(option => option.setAttribute('aria-pressed', option === button))
-    panel.querySelector('#studio-hint').textContent = button.dataset.paintMode === 'draw'
-      ? 'Draw on the lamp. Switch to Rotate to decorate another side.'
-      : 'Drag to rotate, scroll or pinch to zoom. Your drawing stays in place.'
-  }))
-  panel.querySelectorAll('[data-paint-tool]').forEach(button => button.addEventListener('click', () => {
-    paint.finishStroke()
-    paint.settings.tool = button.dataset.paintTool
-    panel.querySelectorAll('[data-paint-tool]').forEach(option => option.setAttribute('aria-pressed', option === button))
-    panel.querySelector('#drawing-spacing-label').hidden = button.dataset.paintTool !== 'dots'
-  }))
+  panel.querySelectorAll('[data-paint-mode]').forEach(button =>
+    button.addEventListener('click', () => {
+      paint.setMode(button.dataset.paintMode)
+      panel
+        .querySelectorAll('[data-paint-mode]')
+        .forEach(option => option.setAttribute('aria-pressed', option === button))
+      panel.querySelector('#studio-hint').textContent =
+        button.dataset.paintMode === 'draw'
+          ? 'Draw on the lamp. Switch to Rotate to decorate another side.'
+          : 'Drag to rotate, scroll or pinch to zoom. Your drawing stays in place.'
+    }),
+  )
+  panel.querySelectorAll('[data-paint-tool]').forEach(button =>
+    button.addEventListener('click', () => {
+      paint.finishStroke()
+      paint.settings.tool = button.dataset.paintTool
+      panel
+        .querySelectorAll('[data-paint-tool]')
+        .forEach(option => option.setAttribute('aria-pressed', option === button))
+      panel.querySelector('#drawing-spacing-label').hidden = button.dataset.paintTool !== 'dots'
+    }),
+  )
   function setColor(color) {
     paint.settings.color = color
     panel.querySelector('#drawing-color').value = color
-    panel.querySelectorAll('[data-ink]').forEach(option => option.setAttribute('aria-pressed', option.dataset.ink.toLowerCase() === color.toLowerCase()))
+    panel
+      .querySelectorAll('[data-ink]')
+      .forEach(option =>
+        option.setAttribute(
+          'aria-pressed',
+          option.dataset.ink.toLowerCase() === color.toLowerCase(),
+        ),
+      )
   }
-  panel.querySelectorAll('[data-ink]').forEach(button => button.addEventListener('click', () => setColor(button.dataset.ink)))
-  panel.querySelector('#drawing-color').addEventListener('input', event => setColor(event.target.value))
+  panel
+    .querySelectorAll('[data-ink]')
+    .forEach(button => button.addEventListener('click', () => setColor(button.dataset.ink)))
+  panel
+    .querySelector('#drawing-color')
+    .addEventListener('input', event => setColor(event.target.value))
   panel.querySelector('#drawing-size').addEventListener('input', event => {
     paint.settings.size = Number(event.target.value)
     panel.querySelector('#drawing-size-value').textContent = event.target.value
@@ -83,7 +105,14 @@ export function createPatternStudio({ canvas, camera, controls, root, onClose })
   panel.querySelector('#drawing-undo').addEventListener('click', () => paint.history())
   panel.querySelector('#drawing-redo').addEventListener('click', () => paint.history(true))
   panel.querySelector('#drawing-clear').addEventListener('click', async () => {
-    if (await confirm({ title: 'Clear your drawing?', copy: 'The lamp’s colors and finish will stay as they are. You can undo this while you stay on this model.', action: 'Clear drawing' })) paint.clear()
+    if (
+      await confirm({
+        title: 'Clear your drawing?',
+        copy: 'The lamp’s colors and finish will stay as they are. You can undo this while you stay on this model.',
+        action: 'Clear drawing',
+      })
+    )
+      paint.clear()
   })
   document.addEventListener('keydown', event => {
     if (!paint.open || dialog.open || /INPUT|TEXTAREA|SELECT/.test(event.target.tagName)) return
@@ -92,5 +121,12 @@ export function createPatternStudio({ canvas, camera, controls, root, onClose })
       paint.history(event.key.toLowerCase() === 'y' || event.shiftKey)
     }
   })
-  return { panel, paint, confirm, get confirming() { return dialog.open } }
+  return {
+    panel,
+    paint,
+    confirm,
+    get confirming() {
+      return dialog.open
+    },
+  }
 }

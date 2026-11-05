@@ -12,7 +12,10 @@ export function createCeramicEnvironment(renderer) {
   ]) {
     const card = new THREE.Mesh(
       new THREE.PlaneGeometry(width, height),
-      new THREE.MeshBasicMaterial({ color: new THREE.Color(brightness, brightness, brightness), side: THREE.DoubleSide }),
+      new THREE.MeshBasicMaterial({
+        color: new THREE.Color(brightness, brightness, brightness),
+        side: THREE.DoubleSide,
+      }),
     )
     card.position.set(...position)
     card.lookAt(0, 0, 0)
@@ -21,14 +24,14 @@ export function createCeramicEnvironment(renderer) {
   const generator = new THREE.PMREMGenerator(renderer)
   const environment = generator.fromScene(studio, 0.06)
   generator.dispose()
-  studio.children.forEach((card) => {
+  studio.children.forEach(card => {
     card.geometry.dispose()
     card.material.dispose()
   })
   return environment
 }
 
-const surfaceFunctions = /* glsl */`
+const surfaceFunctions = /* glsl */ `
   varying vec3 vCeramicPosition;
 
   float ceramicHash(vec3 p) {
@@ -74,7 +77,7 @@ export function createCeramicMaterial(color, environment) {
   })
   material.userData.isCeramic = true
   material.customProgramCacheKey = () => 'ceramic-glaze-v1'
-  material.onBeforeCompile = (shader) => {
+  material.onBeforeCompile = shader => {
     // Object-space sampling avoids UV seams, stretched grain, and texture
     // swimming as the visitor rotates the lamp. Mesh scale is baked by addMesh.
     shader.vertexShader = shader.vertexShader
@@ -82,7 +85,9 @@ export function createCeramicMaterial(color, environment) {
       .replace('#include <begin_vertex>', '#include <begin_vertex>\nvCeramicPosition = position;')
     shader.fragmentShader = shader.fragmentShader
       .replace('#include <common>', `#include <common>\n${surfaceFunctions}`)
-      .replace('#include <roughnessmap_fragment>', /* glsl */`
+      .replace(
+        '#include <roughnessmap_fragment>',
+        /* glsl */ `
         #include <roughnessmap_fragment>
         float footprint = max(length(dFdx(vCeramicPosition)), length(dFdy(vCeramicPosition)));
         // Fade subpixel detail on distant/mobile views to avoid sparkling.
@@ -93,23 +98,33 @@ export function createCeramicMaterial(color, environment) {
         float ceramicPores = smoothstep(0.72, 0.92, ceramicNoise(vCeramicPosition * 55.0 + 17.0)) * poreVisibility;
         float ceramicRelief = ceramicGlaze * 0.006 + ceramicGrain * 0.00085 - ceramicPores * 0.00065;
         roughnessFactor = clamp(roughnessFactor + (ceramicGlaze - 0.5) * 0.1 + ceramicGrain * 0.04 + ceramicPores * 0.04, 0.3, 0.52);
-      `)
-      .replace('#include <normal_fragment_maps>', /* glsl */`
+      `,
+      )
+      .replace(
+        '#include <normal_fragment_maps>',
+        /* glsl */ `
         #include <normal_fragment_maps>
         normal = ceramicNormal(normal, ceramicRelief, faceDirection);
-      `)
-      .replace('#include <clearcoat_normal_fragment_maps>', /* glsl */`
+      `,
+      )
+      .replace(
+        '#include <clearcoat_normal_fragment_maps>',
+        /* glsl */ `
         #include <clearcoat_normal_fragment_maps>
         #ifdef USE_CLEARCOAT
           clearcoatNormal = ceramicNormal(clearcoatNormal, ceramicGlaze * 0.006 + ceramicGrain * 0.00008, faceDirection);
         #endif
-      `)
-      .replace('#include <lights_physical_fragment>', /* glsl */`
+      `,
+      )
+      .replace(
+        '#include <lights_physical_fragment>',
+        /* glsl */ `
         #include <lights_physical_fragment>
         #ifdef USE_CLEARCOAT
           material.clearcoatRoughness = clamp(material.clearcoatRoughness + (ceramicGlaze - 0.5) * 0.06, 0.12, 0.3);
         #endif
-      `)
+      `,
+      )
     // Base color and emissive are intentionally untouched by the surface shader.
   }
   return material

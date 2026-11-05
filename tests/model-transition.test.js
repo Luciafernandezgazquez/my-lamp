@@ -10,8 +10,18 @@ test('outgoing carousel travels sideways and back without modifying the lamp', (
   part.position.y = 0.9
   root.add(part)
   const vertices = part.geometry.attributes.position.array.slice()
-  const rest = { position: root.position.clone(), rotation: root.rotation.clone(), scale: root.scale.clone() }
-  const path = { right: new THREE.Vector3(1, 0, 0), towardCamera: new THREE.Vector3(0, 0, 1), distance: 7, depth: 1, direction: 1 }
+  const rest = {
+    position: root.position.clone(),
+    rotation: root.rotation.clone(),
+    scale: root.scale.clone(),
+  }
+  const path = {
+    right: new THREE.Vector3(1, 0, 0),
+    towardCamera: new THREE.Vector3(0, 0, 1),
+    distance: 7,
+    depth: 1,
+    direction: 1,
+  }
   applyCarouselPose(root, rest, path, -0.5)
   assert.equal(root.position.x, -3.5)
   assert.equal(root.position.z, -0.5)
@@ -37,12 +47,20 @@ function fixture(reduced = false) {
   const preference = new EventTarget()
   preference.matches = reduced
   let id = 'a'
-  const swaps = [], disposed = [], locks = []
-  const add = () => root.add(new THREE.Mesh(new THREE.SphereGeometry(1.5), new THREE.MeshStandardMaterial()))
+  const swaps = [],
+    disposed = [],
+    locks = []
+  const add = () =>
+    root.add(new THREE.Mesh(new THREE.SphereGeometry(1.5), new THREE.MeshStandardMaterial()))
   add()
   const transition = createModelTransition({
-    root, scene, camera, controls, motionPreference: preference,
-    modelIds: ['a', 'b', 'c', 'd'], currentId: () => id,
+    root,
+    scene,
+    camera,
+    controls,
+    motionPreference: preference,
+    modelIds: ['a', 'b', 'c', 'd'],
+    currentId: () => id,
     swap(next) {
       const old = new THREE.Group()
       old.position.copy(root.position)
@@ -53,9 +71,17 @@ function fixture(reduced = false) {
       add()
       return old
     },
-    frame() { camera.position.set(4, 1, 7); controls.target.set(0, 0.1, 0) },
-    dispose(old) { disposed.push(old); old.clear() },
-    onLock(locked) { locks.push(locked) },
+    frame() {
+      camera.position.set(4, 1, 7)
+      controls.target.set(0, 0.1, 0)
+    },
+    dispose(old) {
+      disposed.push(old)
+      old.clear()
+    },
+    onLock(locked) {
+      locks.push(locked)
+    },
   })
   return { transition, root, scene, camera, controls, preference, swaps, disposed, locks }
 }

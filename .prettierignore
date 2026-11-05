@@ -1,0 +1,8 @@
+node_modules/
+dist/
+dist-ssr/
+coverage/
+# Generated lockfile, imported assets, and historical review artifacts.
+package-lock.json
+public/
+artifacts/
